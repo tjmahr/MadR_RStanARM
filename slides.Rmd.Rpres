@@ -113,6 +113,14 @@ https://thinkinator.com/2016/01/12/r-users-will-now-inevitably-become-bayesians/
 I eat all this up.
 
 
+Basic regression model
+========================================================
+
+$$y_i \sim \mathrm{Normal}(\mu_i, \sigma)$$
+
+Observation i is the predicted mean i
+
+$$\mu_i = \alpha + \beta_1*x_{1i} + \beta_{2}*x_{2i}$$
 
 
 
@@ -121,10 +129,18 @@ The Slide With The Theorem On It
 
 $$ P(A \mid B) = \frac{ P(B \mid A) \, P(A)}{P(B)} $$
 
-$$ P(\mathrm{duck} \mid \mathrm{quacks}) = \frac{ P(\mathrm{quacks} \mid \mathrm{duck}) \, P(\mathrm{duck})}{P(\mathrm{quacks})} $$
-
+$$ P(\mathrm{hypothesis} \mid \mathrm{data}) = \frac{ P(\mathrm{data} \mid \mathrm{hypothesis}) \, P(\mathrm{hypothesis})}{P(\mathrm{data})} $$
 
 $$ \mathrm{posterior} = \frac{ \mathrm{likelihood} * \mathrm{prior}}{\mathrm{evidence}} $$
+
+Evidence
+========================================================
+
+Also call marginal likelihood. Weighted average of likelihood.
+
+$$ P(\mathrm{duck} \mid \mathrm{quacks}) = \frac{ P(\mathrm{quacks} \mid \mathrm{duck}) \, P(\mathrm{duck})}{P(\mathrm{quacks})} $$
+
+$$ P(\mathrm{duck} \mid \mathrm{quacks, looks}) = \frac{ P(\mathrm{quacks, looks} \mid \mathrm{duck}) \, P(\mathrm{duck})}{P(\mathrm{quacks, looks})} $$
 
 
 Bayesian stats
