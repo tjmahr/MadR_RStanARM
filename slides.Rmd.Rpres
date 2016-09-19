@@ -1,0 +1,276 @@
+Bayesian Regression Models with RStanARM
+========================================================
+author: Tristan Mahr
+date: Sept. 21, 2016
+autosize: true
+incremental: true
+
+The "Crisis" in Psychology
+========================================================
+left: 50%
+
+[Open Science Collaboration (2015)](http://science.sciencemag.org/content/349/6251/aac4716) tries to replicate 100 studies published in 3 psychology different journals in 2008.
+
+![Scatter plot of original vs replicated effect sizes](./assets/reproducibility.PNG)
+
+***
+
+- Boil an entire study down to a single effect size and a test statistic.
+  - Compare replication's test statistic and magnitude of effect size against original.
+- Approximately 36% of the studies are replicated.
+- On average, the effect size in the replication is half that of the original study.
+
+Most studies did not replicate, and the replicated effects were considerably
+smaller than the original effects.
+
+
+
+Reactions
+========================================================
+
+We're doomed. Most findings are probably false.
+
+![](./assets/throne-of-lies.gif)
+
+***
+
+No, this is business as usual. Any credible discipline has to do this kind of house-cleaning from time to time.
+
+![](./assets/business-as-usual.gif)
+
+
+
+
+It gets worse...
+========================================================
+
+Some famous findings are failing to replicate.
+
+- [Ego depletion](https://www.youtube.com/watch?v=2MDNvKXdLEM)
+- [Facial feedback](http://www.slate.com/articles/health_and_science/cover_story/2016/08/can_smiling_make_you_happier_maybe_maybe_not_we_have_no_idea.html)
+- [Power pose](http://www.slate.com/articles/health_and_science/science/2016/01/amy_cuddy_s_power_pose_research_is_the_latest_example_of_scientific_overreach.html)
+
+![](./assets/this-is-fine.jpeg) <small>&mdash; @DrPrimestein <a href="https://twitter.com/DrPrimestein/status/770210303963463681">August 29, 2016</a></small>
+
+
+***
+
+- What does a failed replication even mean?
+- Oh, great here come the [replication bullies](http://science.sciencemag.org/content/344/6186/788.summary).
+- [Everything is (and always been) f'ed](https://hardsci.wordpress.com/2016/08/11/everything-is-fucked-the-syllabus/).
+
+
+
+For me, it made me more aware of questionable research practices
+========================================================
+
+- HARKing (hypothesizing after results are known)
+  - Telling a story to fit the data.
+- Garden of forking data
+  - Conducting countless sub-tests and sub-analyses on the data
+- p-hacking
+  - Doing these tests in order to find a significant effect.
+- Selective reporting
+  - Reporting only the tests that yielded a significant result.
+
+Some solutions
+========================================================
+
+- Pre-registration
+  - Write down your hypotheses and analysis plan before data collection.
+  - Give to third party.
+  - Do the analysis.
+  - Do any additional analyses but indicate that they are post-hoc.
+
+
+
+
+
+
+
+My response
+========================================================
+
+- Psychology's soul-searching about replication crisis made me want to level up my stats.
+- Started reading ARM book. It emphasized estimation, uncertainty and simulation.
+- Midway through, the book pivots to Bayesian estimation.
+- I roll with it.
+
+
+January 2016
+========================================================
+
+There was an influx of Bayesian tools for R around January.
+
+- I'm down the rabbit hole, writing Stan models to fit the models from the ARM book.
+- [Statistical Rethinking](http://xcelab.net/rm/statistical-rethinking/), a book that reteaches regression from a Bayesian perspective with R and Stan, is released (12/2015).
+- A new version of [brms](https://cran.r-project.org/web/packages/brms/index.html) is released (1/2016). This package converts R model code into Stan programs.
+- [RStanARM](https://cran.r-project.org/web/packages/rstanarm/index.html) is released (1/2016).
+
+https://thinkinator.com/2016/01/12/r-users-will-now-inevitably-become-bayesians/
+
+
+I eat all this up.
+
+
+
+
+
+The Slide With The Theorem On It
+========================================================
+
+$$ P(A \mid B) = \frac{ P(B \mid A) \, P(A)}{P(B)} $$
+
+$$ P(\mathrm{duck} \mid \mathrm{quacks}) = \frac{ P(\mathrm{quacks} \mid \mathrm{duck}) \, P(\mathrm{duck})}{P(\mathrm{quacks})} $$
+
+
+$$ \mathrm{posterior} = \frac{ \mathrm{likelihood} * \mathrm{prior}}{\mathrm{evidence}} $$
+
+
+Bayesian stats
+========================================================
+
+- A frequentist model provides one model of many plausible models of the data. This model has certain properties and optimizes a certain penalty.
+- A Bayesian model is a model of models. We get a distribution of plausible models of the data.
+- We can quantify our uncertainty about the role of predictor by asking questions about the distribution of that predictor's parameter values.
+- Priors...? They get conditioned/trained/updated by the data. We'll get back to them.
+
+
+
+Ecosystem
+========================================================
+
+
+
+What is Stan?
+========================================================
+
+- A programming language for probablistic stats.
+- Write out a program using a mathy syntax.
+- The model is _compiled_ into an executable that does the sampling.
+- Pystan and RStan are interfaces that you send/receive data from the program.
+- Simple example with RStan
+- But ugh, I don't want to learn a whole new programming language right now.
+
+
+What is RStanArm?
+========================================================
+
+- Batteries included, precompiled versions of common regression models.
+- `glm` -> `stan_glm`, `glmer` -> `stan_glmer`.
+- Write your regular code. Add `stan_` to the front, and add a prior.
+
+
+
+
+
+
+
+
+default model summary
+========================================================
+
+
+```{r}
+model <- lm(Sepal.Length ~ Sepal.Width, iris)
+summary(model)
+```
+
+arm: opinionated
+========================================================
+
+ARM just reports _B_ and SE.
+
+```{r, message = FALSE}
+library("dplyr")
+arm::display(model)
+```
+
+
+
+
+arm: opinionated
+========================================================
+
+
+```{r}
+model_sim <- arm::sim(model)
+
+coef(model_sim) %>% apply(2, quantile, probs = c(.025, .25, .5, .75, .975))
+```
+
+
+- Psychology's soul-searching about replication crisis made me want to level up my stats.
+- Started reading ARM book. It emphasized uncertainty and simulation.
+
+
+
+
+
+  - Similar perspective: https://speakerdeck.com/jakevdp/statistics-for-hackers
+  - arm package's opinionated interface. No p value.
+  - Lazy posteriors: Use point estimate of model parameter and its standard error to seed a distribution. Draw from that distribution. Now you have an interval of plausible model parameters.
+- Most NHST practitioners cannot correctly interpret confidence intervals or p-values.
+
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+
+First Slide
+========================================================
+
+For more details on authoring R presentations please visit <https://support.rstudio.com/hc/en-us/articles/200486468>.
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+
+First Slide
+========================================================
+
+For more details on authoring R presentations please visit <https://support.rstudio.com/hc/en-us/articles/200486468>.
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+
+First Slide
+========================================================
+
+For more details on authoring R presentations please visit <https://support.rstudio.com/hc/en-us/articles/200486468>.
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+
+First Slide
+========================================================
+
+For more details on authoring R presentations please visit <https://support.rstudio.com/hc/en-us/articles/200486468>.
+
+- Bullet 1
+- Bullet 2
+- Bullet 3
+
+
+
+
+Slide With Code
+========================================================
+title: false
+
+```{r}
+summary(cars)
+```
+
+Slide With Plot
+========================================================
+
+```{r, echo=FALSE}
+plot(cars)
+```
