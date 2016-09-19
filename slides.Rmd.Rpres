@@ -118,9 +118,14 @@ Basic regression model
 
 $$y_i \sim \mathrm{Normal}(\mu_i, \sigma)$$
 
-Observation i is the predicted mean i
+Observation $y_i$ is a draw from a normal distribution. The draw is centered around a mean
+$\mu_i$.
 
 $$\mu_i = \alpha + \beta_1*x_{1i} + \beta_{2}*x_{2i}$$
+
+We estiamte the mean using a linear combination of predictor variables () plus a constant/intercept term $\alpah$.
+
+The predicted mean is a constant term  plus a combination of weighted predictor values.
 
 
 
