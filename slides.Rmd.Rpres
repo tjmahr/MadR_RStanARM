@@ -15,7 +15,7 @@ left: 50%
 
 ***
 
-- Boil an entire study down to a single effect size and a test statistic.
+- Boil a study down to 1 effect size and 1 test statistic.
   - Compare replication's test statistic and magnitude of effect size against original.
 - Approximately 36% of the studies are replicated.
 - On average, the effect size in the replication is half that of the original study.
@@ -49,15 +49,34 @@ Some famous findings are failing to replicate.
 - [Ego depletion](https://www.youtube.com/watch?v=2MDNvKXdLEM)
 - [Facial feedback](http://www.slate.com/articles/health_and_science/cover_story/2016/08/can_smiling_make_you_happier_maybe_maybe_not_we_have_no_idea.html)
 - [Power pose](http://www.slate.com/articles/health_and_science/science/2016/01/amy_cuddy_s_power_pose_research_is_the_latest_example_of_scientific_overreach.html)
+- [Others](http://nymag.com/scienceofus/2016/09/a-helpful-rundown-of-psychologys-replication-crisis.html?mid=twitter-share-scienceofus)
+
+
+****
 
 ![](./assets/this-is-fine.jpeg) <small>&mdash; @DrPrimestein <a href="https://twitter.com/DrPrimestein/status/770210303963463681">August 29, 2016</a></small>
 
 
-***
+Lots of hand-wringing and soul-searching
+=============================================
+
+Some constructive:
 
 - What does a failed replication even mean?
+- [Everything is f'ed](https://hardsci.wordpress.com/2016/08/11/everything-is-fucked-the-syllabus/). Everything has always been f'd.
+
+Some more reactionary:
+
+- Replication creates an [industry for incompetent hacks](http://www.sciencedirect.com/science/article/pii/S002210311600007X).
 - Oh, great here come the [replication bullies](http://science.sciencemag.org/content/344/6186/788.summary).
-- [Everything is (and always been) f'ed](https://hardsci.wordpress.com/2016/08/11/everything-is-fucked-the-syllabus/).
+
+***
+
+![](./assets/dumpster-fire.gif)
+
+
+
+
 
 
 
@@ -116,37 +135,76 @@ I eat all this up.
 Basic regression model
 ========================================================
 
-$$y_i \sim \mathrm{Normal}(\mu_i, \sigma)$$
+We want to estimate a response $y$ with 2 predictors $x_1, x_2$.
 
-Observation $y_i$ is a draw from a normal distribution. The draw is centered around a mean
-$\mu_i$.
+$$
+\begin{align*}
+   y_i &\sim \mathrm{Normal}(\mathrm{mean} = \mu_i, \mathrm{SD} = \sigma)
+   \\
+  \mu_i &= \alpha + \beta_1*x_{1i} + \beta_{2}*x_{2i}
+\end{align*}
+$$
 
-$$\mu_i = \alpha + \beta_1*x_{1i} + \beta_{2}*x_{2i}$$
+Observation $y_i$ is a draw from a normal distribution centered around a mean $\mu_i$ with a standard deviation of $\sigma$.
 
-We estiamte the mean using a linear combination of predictor variables () plus a constant/intercept term $\alpah$.
+We estimate the mean with a constant "intercept" term $\alpha$ plus a linear combination of predictor variables ($x_1, x_2$).
 
-The predicted mean is a constant term  plus a combination of weighted predictor values.
+
+Parameters we need to estimate
+========================================================
+
+$\alpha, \beta_1, \beta_2$
+
+
+
+
+
+
 
 
 
 The Slide With The Theorem On It
 ========================================================
 
-$$ P(A \mid B) = \frac{ P(B \mid A) \, P(A)}{P(B)} $$
-
-$$ P(\mathrm{hypothesis} \mid \mathrm{data}) = \frac{ P(\mathrm{data} \mid \mathrm{hypothesis}) \, P(\mathrm{hypothesis})}{P(\mathrm{data})} $$
-
-$$ \mathrm{posterior} = \frac{ \mathrm{likelihood} * \mathrm{prior}}{\mathrm{evidence}} $$
-
-Evidence
-========================================================
-
-Also call marginal likelihood. Weighted average of likelihood.
+I saw a creature, and it just _quacked_ at me! Was it a duck?
 
 $$ P(\mathrm{duck} \mid \mathrm{quacks}) = \frac{ P(\mathrm{quacks} \mid \mathrm{duck}) \, P(\mathrm{duck})}{P(\mathrm{quacks})} $$
 
-$$ P(\mathrm{duck} \mid \mathrm{quacks, looks}) = \frac{ P(\mathrm{quacks, looks} \mid \mathrm{duck}) \, P(\mathrm{duck})}{P(\mathrm{quacks, looks})} $$
+How plausible is some possibility given the data?
 
+$$ P(\mathrm{hypothesis} \mid \mathrm{data}) = \frac{ P(\mathrm{data} \mid \mathrm{hypothesis}) \, P(\mathrm{hypothesis})}{P(\mathrm{data})} $$
+
+$$ \mathrm{posterior} = \frac{ \mathrm{likelihood} * \mathrm{prior}}{\mathrm{average\ likelihood}} $$
+
+
+
+Likelihood is fit
+========================================================
+
+The line of best fit from classical regression is that maximizes likelihood.
+
+```{r}
+
+```
+
+
+
+
+This is where things get difficult
+========================================================
+
+$$ \mathrm{posterior} = \frac{ \mathrm{likelihood} * \mathrm{prior}}{\mathrm{average\ likelihood}} $$
+
+$$ P(\alpha, \beta, \sigma \mid x) = \frac{ P(x \mid \alpha, \beta, \sigma) \, P(\alpha, \beta, \sigma)}{\iiint \, P(x \mid \alpha, \beta, \sigma) \, P(\alpha, \beta, \sigma) \,d\alpha \,d\beta \,d\sigma} $$
+
+Things get gnarly. We don't do this integral calculus.
+
+This is the black-box step. Instead, we rely on Markov-chain Monte Carlo simulation to get us samples from the posterior. Those samples will provide a detailed picture of the posters.
+
+
+
+
+$$ $$
 
 Bayesian stats
 ========================================================
@@ -158,7 +216,19 @@ Bayesian stats
 
 
 
-Ecosystem
+
+
+
+
+
+
+
+
+
+
+
+
+Software ecosystem
 ========================================================
 
 
