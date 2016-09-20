@@ -5,6 +5,22 @@ date: Sept. 21, 2016
 autosize: true
 incremental: true
 
+
+
+
+
+
+
+
+
+How I Got into Bayesian Statistics
+=======================================================
+
+- I did all of my statistics coursework through psychology and educational psychology.
+- And psychology
+
+
+
 The "Crisis" in Psychology
 ========================================================
 left: 50%
@@ -28,20 +44,22 @@ smaller than the original effects.
 Reactions
 ========================================================
 
-We're doomed. Most findings are probably false.
+We're doomed.
 
 ![](./assets/throne-of-lies.gif)
 
+Most findings are probably false.
+
 ***
 
-No, this is business as usual. Any credible discipline has to do this kind of house-cleaning from time to time.
+No, this is business as usual.
 
 ![](./assets/business-as-usual.gif)
 
+Any credible discipline has to do this kind of house-cleaning from time to time.
 
 
-
-It gets worse...
+It's still going...
 ========================================================
 
 Some famous findings are failing to replicate.
@@ -60,27 +78,39 @@ Some famous findings are failing to replicate.
 Lots of hand-wringing and soul-searching
 =============================================
 
-Some constructive:
-
-- What does a failed replication even mean?
-- [Everything is f'ed](https://hardsci.wordpress.com/2016/08/11/everything-is-fucked-the-syllabus/). Everything has always been f'd.
-
-Some more reactionary:
+Some reactionary:
 
 - Replication creates an [industry for incompetent hacks](http://www.sciencedirect.com/science/article/pii/S002210311600007X).
 - Oh, great here come the [replication bullies](http://science.sciencemag.org/content/344/6186/788.summary).
-
-***
+- And the [methodological terrorists](https://twitter.com/maltoesermalte/status/777999804911812609).
 
 ![](./assets/dumpster-fire.gif)
 
+***
+
+Some constructive:
+
+- What does a failed replication even mean?
+- [Everything is f'ed](https://hardsci.wordpress.com/2016/08/11/everything-is-fucked-the-syllabus/) -- so what else is new?
 
 
 
 
+I'm optimistic
+========================================================
+
+Better research practices are catching on.
+
+- Pre-registration
+- Power analyses
+- Meta-analytic tools to assess the health of a field
+- Better disclosure of other unanalyzed measurements
+- Etc.
 
 
-For me, it made me more aware of questionable research practices
+
+
+The crisis made me more aware of questionable research practices
 ========================================================
 
 - HARKing (hypothesizing after results are known)
@@ -91,18 +121,7 @@ For me, it made me more aware of questionable research practices
   - Doing these tests in order to find a significant effect.
 - Selective reporting
   - Reporting only the tests that yielded a significant result.
-
-Some solutions
-========================================================
-
-- Pre-registration
-  - Write down your hypotheses and analysis plan before data collection.
-  - Give to third party.
-  - Do the analysis.
-  - Do any additional analyses but indicate that they are post-hoc.
-
-
-
+- And so on.
 
 
 
@@ -110,10 +129,26 @@ Some solutions
 My response
 ========================================================
 
-- Psychology's soul-searching about replication crisis made me want to level up my stats.
-- Started reading ARM book. It emphasized estimation, uncertainty and simulation.
+- Psychology's soul-searching about the replication crisis made me want to level up my stats.
+- In particular, I wanted something besides statistical significance.
+  - p-values don't mean what you probably think they mean.
+  - Neither do confidence intervals.
+  - Statistical significance is not related to practical significance.
+
+
+
+
+ARM
+========================================================
+
+- December, 2015. Started reading ARM book.
+- It emphasized estimation, uncertainty and simulation.
 - Midway through, the book pivots to Bayesian estimation.
 - I roll with it.
+
+
+
+
 
 
 January 2016
@@ -130,6 +165,24 @@ https://thinkinator.com/2016/01/12/r-users-will-now-inevitably-become-bayesians/
 
 
 I eat all this up.
+
+
+That's how
+===========================================================
+That's how I became a Bayesian.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 Basic regression model
@@ -163,27 +216,202 @@ $\alpha, \beta_1, \beta_2$
 
 
 
-The Slide With The Theorem On It
-========================================================
 
-I saw a creature, and it just _quacked_ at me! Was it a duck?
+Back to Bayes
+=============================
 
-$$ P(\mathrm{duck} \mid \mathrm{quacks}) = \frac{ P(\mathrm{quacks} \mid \mathrm{duck}) \, P(\mathrm{duck})}{P(\mathrm{quacks})} $$
+My prior is that any value between 70-130 is equally likely to be the mean of the IQs, and that the SD of the IQs is fixed at 15.
 
-How plausible is some possibility given the data?
+```{r}
+each_mean <- seq(from = 70, to = 130, by = 1)
+each_sd <- 15
+# each_sd <- seq(from = 10, to = 20, by = 1)
 
-$$ P(\mathrm{hypothesis} \mid \mathrm{data}) = \frac{ P(\mathrm{data} \mid \mathrm{hypothesis}) \, P(\mathrm{hypothesis})}{P(\mathrm{data})} $$
+library("tidyr")
+df <- data_frame(each_mean) %>%
+  expand(each_mean, each_sd) %>%
+  mutate(prior = 1 / length(each_mean),
+         posterior = prior,
+         data_seen = 0)
+df
 
-$$ \mathrm{posterior} = \frac{ \mathrm{likelihood} * \mathrm{prior}}{\mathrm{average\ likelihood}} $$
+update_distribution <- function(df, data) {
+  data_seen <- unique(df$data_seen) + length(data)
+  df %>%
+    select(each_mean, each_sd, prior = posterior) %>%
+    expand(nesting(each_mean, each_sd, prior), points = data) %>%
+    group_by(each_mean, each_sd, prior) %>%
+    summarise(likelihood = prod(dnorm(points, each_mean, each_sd))) %>%
+    ungroup %>%
+    mutate(posterior = likelihood * prior / (sum(likelihood * prior)),
+           data_seen = data_seen)
+}
+
+
+iq_sequence <- Map(seq, 1, seq_along(iqs)) %>%
+  lapply(function(xs) iqs[xs]) %>%
+  purrr::map(~ update_distribution(df, .x))
+
+# include 0
+iq_sequence <- c(list(df), iq_sequence)
+
+
+df <- iq_sequence %>%
+  purrr::accumulate(bind_rows) %>%
+  purrr::map(. %>%
+               mutate(step = max(data_seen)) %>%
+               filter(step - data_seen <= 5) %>%
+               mutate(alpha = 1 - ((step - data_seen) / 5))) %>%
+  bind_rows
+
+library("gganimate")
+#
+# p <- ggplot(df) +
+#   aes(x = each_mean, y = posterior, frame = step) +
+#   geom_line(aes(group = data_seen, alpha = alpha)) +
+#   ggtitle("Data observed:") +
+#   xlab("possible mean") +
+#   ylab("posterior probability") +
+#   guides(alpha = FALSE) +
+#   theme_grey(base_size = 14)
+# animation::ani.options(interval = 1/10)
+#
+# g <- gg_animate(p,  ani.height = 400, ani.width = 600)
+# gg_animate_save(g, filename = "./updating.gif", saver = "gif",  ani.height = 400, ani.width = 600)
+#
+
+
+df1$likelihood
+
+df %>%
+  mutate()
+
+priors <- expand.grid(mean = p_mean, sd = p_sd) %>%
+  mutate(prior = 1) %>%
+  as_data_frame()
+
+priors
+
+prior <- rep(1 , 1000)
+likelihood <- dbinom(6, size = 9, prob = p_grid)
+posterior <- likelihood * prior
+posterior <- posterior / sum(posterior)
+# Sampling from the posterior
+samples <- sample(p_grid, prob = posterior, size = 1e4, replace = TRUE)
+
+plot(samples)
+
+
+possible_means <- i
+
+iqs
+```
 
 
 
-Likelihood is fit
-========================================================
+
+
+
+
+
+
+
+
+
+
+
+***
+
+
+
+
+
+
+Values with higher density are more likely in that bell curve.
+
+
+Draw a normal bell-curve with a mean of 100 and SD of 15.
+
+
+```{r}
+ geom_density(aes(x)) +
+  geom_point(aes(iqs, y = dnorm(iqs, 100, 15)), data = data_frame(x = iqs))
+
+```
+
+
+
+
+Draw observations on a normal bell-curve (100, 15). Height of the point on the bell curve.
+
+```{r}
+ggplot()
+```
+
+
+
+```{r}
+pop_average <- dnorm(iqs, mean = 100, sd = 15)
+pop_average %>% round(3)
+mean(pop_average)
+
+below_average <- dnorm(iqs, mean = 85, sd = 15)
+above_average <- dnorm(iqs, mean = 115, sd = 15)
+
+mean(below_average)
+mean(above_average)
+
+ggplot(data_frame(iqs), aes(x = iqs)) +
+  geom_point(aes(y = pop_average, color = "100")) +
+  geom_point(aes(y = below_average, color = "85")) +
+  geom_point(aes(y = above_average, color = "115"))
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 The line of best fit from classical regression is that maximizes likelihood.
 
 ```{r}
+
+
+
+library("ggplot2")
+library("dplyr")
+ggplot(car::Burt) +
+  aes(x = IQbio) +
+  geom_line(aes(y = dnorm(IQbio, 70, 15), color = "70, 15")) +
+  geom_point(aes(y = dnorm(IQbio, 70, 15), color = "70, 15")) +
+  geom_line(aes(y = dnorm(IQbio, 100, 15), color = "100, 15")) +
+  geom_point(aes(y = dnorm(IQbio, 100, 15), color = "100, 15"))
+
+geom_point(aes(y = density(IQbio)))
+
+density(car::Burt$IQbio)[["y"]]
+  geom_density(aes(x = IQbio, color = "raw data")) +
+  geom_line(aes(x = IQbio, y = dnorm(IQbio, mean(IQbio), sd(IQbio)), color = "cheating")) +
+  +
+  geom_line(aes(x = IQbio, y = dnorm(IQbio, 85, 15), color = "85, 15")) +
+  geom_line(aes(x = IQbio, y = dnorm(IQbio, 100, 15), color = "100, 15")) +
+  geom_line(aes(x = IQbio, y = dnorm(IQbio, 145, 15), color = "115, 15"))
+
+
+dnorm(car::Burt$IQbio, 70, 15) %>% mean
+dnorm(car::Burt$IQbio, 85, 15) %>% mean
+dnorm(car::Burt$IQbio, 100, 15) %>% mean
+dnorm(car::Burt$IQbio, 115, 15) %>% mean
 
 ```
 
@@ -201,10 +429,9 @@ Things get gnarly. We don't do this integral calculus.
 
 This is the black-box step. Instead, we rely on Markov-chain Monte Carlo simulation to get us samples from the posterior. Those samples will provide a detailed picture of the posters.
 
+Enter Stan.
 
 
-
-$$ $$
 
 Bayesian stats
 ========================================================
