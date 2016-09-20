@@ -222,63 +222,10 @@ Back to Bayes
 
 My prior is that any value between 70-130 is equally likely to be the mean of the IQs, and that the SD of the IQs is fixed at 15.
 
+
 ```{r}
-each_mean <- seq(from = 70, to = 130, by = 1)
-each_sd <- 15
-# each_sd <- seq(from = 10, to = 20, by = 1)
-
-library("tidyr")
-df <- data_frame(each_mean) %>%
-  expand(each_mean, each_sd) %>%
-  mutate(prior = 1 / length(each_mean),
-         posterior = prior,
-         data_seen = 0)
-df
-
-update_distribution <- function(df, data) {
-  data_seen <- unique(df$data_seen) + length(data)
-  df %>%
-    select(each_mean, each_sd, prior = posterior) %>%
-    expand(nesting(each_mean, each_sd, prior), points = data) %>%
-    group_by(each_mean, each_sd, prior) %>%
-    summarise(likelihood = prod(dnorm(points, each_mean, each_sd))) %>%
-    ungroup %>%
-    mutate(posterior = likelihood * prior / (sum(likelihood * prior)),
-           data_seen = data_seen)
-}
 
 
-iq_sequence <- Map(seq, 1, seq_along(iqs)) %>%
-  lapply(function(xs) iqs[xs]) %>%
-  purrr::map(~ update_distribution(df, .x))
-
-# include 0
-iq_sequence <- c(list(df), iq_sequence)
-
-
-df <- iq_sequence %>%
-  purrr::accumulate(bind_rows) %>%
-  purrr::map(. %>%
-               mutate(step = max(data_seen)) %>%
-               filter(step - data_seen <= 5) %>%
-               mutate(alpha = 1 - ((step - data_seen) / 5))) %>%
-  bind_rows
-
-library("gganimate")
-#
-# p <- ggplot(df) +
-#   aes(x = each_mean, y = posterior, frame = step) +
-#   geom_line(aes(group = data_seen, alpha = alpha)) +
-#   ggtitle("Data observed:") +
-#   xlab("possible mean") +
-#   ylab("posterior probability") +
-#   guides(alpha = FALSE) +
-#   theme_grey(base_size = 14)
-# animation::ani.options(interval = 1/10)
-#
-# g <- gg_animate(p,  ani.height = 400, ani.width = 600)
-# gg_animate_save(g, filename = "./updating.gif", saver = "gif",  ani.height = 400, ani.width = 600)
-#
 
 
 df1$likelihood
@@ -578,17 +525,115 @@ For more details on authoring R presentations please visit <https://support.rstu
 
 
 
-Slide With Code
+
+
+
+The Slide With The Theorem On It
+========================================================
+
+I saw a creature, and it just _quacked_ at me! Was it a duck?
+
+$$ P(\mathrm{duck} \mid \mathrm{quacks}) = \frac{ P(\mathrm{quacks} \mid \mathrm{duck}) \, P(\mathrm{duck})}{P(\mathrm{quacks})} $$
+
+How plausible is some possibility given the data?
+
+$$ P(\mathrm{hypothesis} \mid \mathrm{data}) = \frac{ P(\mathrm{data} \mid \mathrm{hypothesis}) \, P(\mathrm{hypothesis})}{P(\mathrm{data})} $$
+
+$$ \mathrm{posterior} = \frac{ \mathrm{likelihood} * \mathrm{prior}}{\mathrm{average\ likelihood}} $$
+
+
+
+Likelihood is fit
+========================================================
+
+We found some IQ scores in an old, questionable dataset.
+
+```{r,  width = 35}
+library("dplyr")
+iqs <- car::Burt$IQbio
+iqs
+```
+
+IQs are scaled to have a population mean of 100 and an SD of 15.
+
+How well do these data fit that kind of bell curve?
+
+
+Density is a measure of likelihood
+========================================================
+left: 40%
+
+* Draw the data on a bell curve on a hypothetical bell curve a mean of 100 and
+  SD of 15.
+* Height of each point on the curve is the density around that point.
+* Higher density regions are more likely.
+* Density decreases (data less likely) are data gets farther from mean.
+
+```{r, echo = FALSE}
+library("ggplot2")
+iq_df <- function(mean, sd = 15) {
+  data_frame(
+    iq = seq(min(iqs), max(iqs), by = 1),
+    density = dnorm(iq, mean, 15),
+    mean = mean,
+    sd = sd)
+}
+```
+
+***
+
+```{r, echo = FALSE}
+p <- ggplot(iq_df(100, 15)) +
+  aes(iq, density) +
+  geom_line() +
+  geom_point(aes(x = iqs, y = dnorm(iqs, 100, 15)), data = data_frame(iqs))
+p
+```
+
+
+
+
+
+Likelihood
 ========================================================
 title: false
 
+Density function `dnorm(xs, mean = 100, sd = 15)` tells us the height of each
+value in `xs` when drawn on a normal bell curve
+
 ```{r}
-summary(cars)
+# likelihood (density) of each point
+dnorm(iqs, 100, 15) %>% round(3)
+
+# likelihood of all points is their product
+prod(dnorm(iqs, 100, 15))
+
+# but quantities gets vanishingly small so we use log scale
+sum(dnorm(iqs, 100, 15, log = TRUE))
 ```
 
-Slide With Plot
+
+
+
+Likelihood
 ========================================================
+title: false
 
-```{r, echo=FALSE}
-plot(cars)
+Which mean fits the data the best? Below average 85, average 100, or above average 115?
+
+```{r}
+sum(dnorm(iqs, 85, 15, log = TRUE))
+sum(dnorm(iqs, 100, 15, log = TRUE))
+sum(dnorm(iqs, 115, 15, log = TRUE))
 ```
+
+We just used a "maximum likelihood" criterion to choose among these alternatives!
+
+
+Likelihood
+=============================
+
+- Likelihood is how well data fit in a distribution.
+- Classical regression's "line of best fit" estimates the parameters that maximize the likelihood of the data.
+
+
