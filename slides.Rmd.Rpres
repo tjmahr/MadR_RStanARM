@@ -13,59 +13,6 @@ incremental: true
 <!-- - And psychology -->
 
 
-Learning More
-===============================================================================
-
-
-You are trained in classical regression
-===============================================================================
-
-You want to read [_Statistical Rethinking_]() and [watch the lectures](https://www.youtube.com/playlist?list=PLDcUM9US4XdMdZOhJWJJD4mDBMnbTWw_z).
-
-![](./assets/unlearn.gif)
-
-***
-
-![](./assets/rethinking.jpg)
-
-
-
-'Rethinking'
-===============================================================================
-
-* This book is exceptional, stuffed to the brim with trivia, advice, and wisdom.
-* Not just a book about statistics, but how we use statistical models in scientific practice.
-* Explains side issues like MCMC, basics of information theory, or why the normal distribution is so prevalent -- but just deep enough for the reader to get the intuitions needed for practice.
-* My sole criticism is that its companion R `rethinking` package is not on CRAN.
-
-
-Rethinking 1
-===============================================================================
-title:false
-
-![](./assets/vampire.PNG)
-
-Rethinking 2
-===============================================================================
-title:false
-
-![](./assets/meet-the-family.PNG)
-
-***
-
-![](./assets/conditioning.PNG)
-
-
-Rethinking 3
-===============================================================================
-title:false
-
-
-
-
-
-
-
 
 
 
@@ -142,7 +89,7 @@ Some reactionary:
 
 - Replication creates an [industry for incompetent hacks](http://www.sciencedirect.com/science/article/pii/S002210311600007X).
 - Oh, great here come the [replication bullies](http://science.sciencemag.org/content/344/6186/788.summary).
-- And the [methodological terrorists](https://twitter.com/maltoesermalte/status/777999804911812609).
+- And the [methodological terrorists](http://andrewgelman.com/2016/09/21/what-has-happened-down-here-is-the-winds-have-changed/).
 
 ![](./assets/dumpster-fire.gif)
 
@@ -460,30 +407,6 @@ Bayesian stats
 
 
 
-
-
-Software ecosystem
-========================================================
-
-
-
-What is Stan?
-========================================================
-
-- A programming language for probablistic stats.
-- Write out a program using a mathy syntax.
-- The model is _compiled_ into an executable that does the sampling.
-- Pystan and RStan are interfaces that you send/receive data from the program.
-- Simple example with RStan
-- But ugh, I don't want to learn a whole new programming language right now.
-
-
-What is RStanArm?
-========================================================
-
-- Batteries included, precompiled versions of common regression models.
-- `glm` -> `stan_glm`, `glmer` -> `stan_glmer`.
-- Write your regular code. Add `stan_` to the front, and add a prior.
 
 
 

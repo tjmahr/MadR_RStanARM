@@ -1,0 +1,9 @@
+.scrollable-slide {
+    height: 800px;
+    overflow-y: auto;
+}
+
+.reveal pre code {
+  font-size: 1.2em;
+}
+
