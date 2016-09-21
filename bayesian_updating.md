@@ -16,7 +16,7 @@ library("dplyr")
 library("tidyr")
 library("ggplot2")
 
-# We have IQ some scores
+# We have some IQ scores
 iqs <- car::Burt$IQbio
 iqs
 #>  [1]  82  80  88 108 116 117 132  71  75  93  95  88 111  63  77  86  83
