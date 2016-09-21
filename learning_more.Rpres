@@ -1,0 +1,122 @@
+Bayesian Regression Models with RStanARM
+========================================================
+author: Tristan Mahr
+date: Sept. 21, 2016
+autosize: true
+incremental: true
+
+
+Learning More
+===============================================================================
+
+
+
+You want to learn Stan
+===============================================================================
+
+- Go to  <http://mc-stan.org/documentation/>
+- Look at the [example models](https://github.com/stan-dev/example-models/wiki) and read the manual.
+
+
+The Stan Manual
+==============================================================================
+
+![](./assets/stan-man1.PNG)
+
+***
+
+![](./assets/stan-man2.PNG)
+
+
+
+You are trained in classical regression
+===============================================================================
+left: 70%
+
+Read [_Statistical Rethinking_](http://xcelab.net/rm/statistical-rethinking/) and [watch the lectures](https://www.youtube.com/playlist?list=PLDcUM9US4XdMdZOhJWJJD4mDBMnbTWw_z).
+
+![](./assets/unlearn.gif)
+
+***
+
+![](./assets/rethinking.jpg)
+
+
+
+'Rethinking'
+===============================================================================
+
+* This book is exceptional, stuffed to the brim with trivia, advice, and wisdom.
+* Not just a book about statistics, but how we use statistical models in scientific practice.
+* Explains side issues like MCMC, basics of information theory, or why the normal distribution is so prevalent -- but just deep enough for the reader to get the intuitions needed for practice.
+* My sole criticism is that its companion R `rethinking` package is not on CRAN.
+
+
+Rethinking 1
+===============================================================================
+title:false
+
+![](./assets/vampire.PNG)
+
+Rethinking 2
+===============================================================================
+title:false
+
+![](./assets/meet-the-family.PNG)
+
+***
+
+![](./assets/conditioning.PNG)
+
+
+You need puppies on the cover
+===============================================================================
+
+Kruschke (2015). [_Doing Bayesian Analysis_](https://sites.google.com/site/doingbayesiandataanalysis/what-s-new-in-2nd-ed).
+
+I just got this book, but so far it's approachable and comprehensive, like a statistical cookbook. Many more equations and proofs than in _Rethinking_.
+
+***
+
+![](./assets/puppies.png)
+
+
+Puppies
+===============================================================================
+title:false
+
+![](./assets/model-specs.png)
+
+***
+
+![](./assets/tails.png)
+
+
+You are a psycholinguist
+===============================================================================
+left: 60%
+
+* Nicenboim and Vasishth (2016). Statistical methods for linguistic research: Foundational Ideas - Part II. <https://arxiv.org/abs/1602.00245>
+* Sorensen and Vasishth (2016). Bayesian linear mixed models using Stan: A tutorial for psychologists, linguists, and cognitive scientists. <https://arxiv.org/abs/1506.06201>
+
+***
+
+![](./assets/psycholinguist.PNG)
+
+
+
+You need a reading list and fast
+===============================================================================
+
+* Etz, et al. (2016). [How to become a Bayesian in eight easy steps: An annotated reading list](https://www.researchgate.net/publication/301981861_How_to_become_a_Bayesian_in_eight_easy_steps_An_annotated_reading_list).
+* Etz has also [great tutorials](https://alexanderetz.com/understanding-bayes/). They focus mostly on Bayes factors, a way to compare models using the denominators from Bayes theorem. _Statistical Rethinking_ mentions these in passing in a single paragraph.
+
+
+
+You need to figure out how many socks are in the laundry
+==============================================================================
+
+- See [Rasmus Bååth's intro to approximate Bayesian inference](http://www.sumsar.net/blog/2015/07/tiny-data-and-the-socks-of-karl-broman-the-movie/).
+- Kind of removed from our topic, but entertaining example that emphasizes how Bayesian models are generative.
+- If we are exploring all the plausible ways the data could have been generated, we're probably doing a kind of Bayesian analysis.
+

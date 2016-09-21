@@ -6,6 +6,59 @@ autosize: true
 incremental: true
 
 
+<!-- How I Got into Bayesian Statistics -->
+<!-- ======================================================= -->
+
+<!-- - I did all of my statistics coursework through psychology and educational psychology. -->
+<!-- - And psychology -->
+
+
+Learning More
+===============================================================================
+
+
+You are trained in classical regression
+===============================================================================
+
+You want to read [_Statistical Rethinking_]() and [watch the lectures](https://www.youtube.com/playlist?list=PLDcUM9US4XdMdZOhJWJJD4mDBMnbTWw_z).
+
+![](./assets/unlearn.gif)
+
+***
+
+![](./assets/rethinking.jpg)
+
+
+
+'Rethinking'
+===============================================================================
+
+* This book is exceptional, stuffed to the brim with trivia, advice, and wisdom.
+* Not just a book about statistics, but how we use statistical models in scientific practice.
+* Explains side issues like MCMC, basics of information theory, or why the normal distribution is so prevalent -- but just deep enough for the reader to get the intuitions needed for practice.
+* My sole criticism is that its companion R `rethinking` package is not on CRAN.
+
+
+Rethinking 1
+===============================================================================
+title:false
+
+![](./assets/vampire.PNG)
+
+Rethinking 2
+===============================================================================
+title:false
+
+![](./assets/meet-the-family.PNG)
+
+***
+
+![](./assets/conditioning.PNG)
+
+
+Rethinking 3
+===============================================================================
+title:false
 
 
 
@@ -13,11 +66,18 @@ incremental: true
 
 
 
-How I Got into Bayesian Statistics
-=======================================================
 
-- I did all of my statistics coursework through psychology and educational psychology.
-- And psychology
+
+
+
+Overview
+========================================================
+
+- How I got into Bayesian statistics
+- Some intuition-building about Bayes theorem
+- Tour of RStanARM
+- Where to learn more about Bayesian statistics
+
 
 
 
@@ -635,5 +695,17 @@ Likelihood
 
 - Likelihood is how well data fit in a distribution.
 - Classical regression's "line of best fit" estimates the parameters that maximize the likelihood of the data.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
