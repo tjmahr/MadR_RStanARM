@@ -212,6 +212,20 @@ summary(stan_model)
 ```
 
 
+First look: Getting a summary from the model
+==================
+class: scrollable-slide
+incremental: false
+
+- We now have post-data probabilities.
+- Based on our prior information and the data, there is 95% probability that a parameter value is in its 95% interval.
+
+```{r}
+summary(stan_model)
+# comment to make the bottom of the output visible
+```
+
+
 More on summary()
 ===================
 

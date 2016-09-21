@@ -1,0 +1,175 @@
+Bayesian Regression Models with RStanARM
+========================================================
+author: Tristan Mahr
+date: Sept. 21, 2016
+autosize: true
+incremental: true
+
+
+
+Overview
+========================================================
+
+- How I got into Bayesian statistics
+- Some intuition-building about Bayes theorem
+- Tour of RStanARM
+- Where to learn more about Bayesian statistics
+
+
+
+August 2015: The "Crisis" in Psychology
+========================================================
+left: 50%
+
+[Open Science Collaboration (2015)](http://science.sciencemag.org/content/349/6251/aac4716) tries to replicate 100 studies published in 3 psychology different journals in 2008.
+
+![Scatter plot of original vs replicated effect sizes](./assets/reproducibility.PNG)
+
+***
+
+- Boil a study down to 1 effect size and 1 test statistic.
+  - Compare replication's test statistic and magnitude of effect size against original.
+- Approximately 36% of the studies are replicated.
+- On average, the effect size in the replication is half that of the original study.
+
+Most studies did not replicate, and the replicated effects were considerably
+smaller than the original effects.
+
+
+
+Reactions
+========================================================
+
+We're doomed.
+
+![](./assets/throne-of-lies.gif)
+
+Most findings are probably false.
+
+***
+
+No, this is business as usual.
+
+![](./assets/business-as-usual.gif)
+
+Any credible discipline has to do this kind of house-cleaning from time to time.
+
+
+It's still going...
+========================================================
+
+Some famous findings are failing to replicate.
+
+- [Ego depletion](https://www.youtube.com/watch?v=2MDNvKXdLEM)
+- [Facial feedback](http://www.slate.com/articles/health_and_science/cover_story/2016/08/can_smiling_make_you_happier_maybe_maybe_not_we_have_no_idea.html)
+- [Power pose](http://www.slate.com/articles/health_and_science/science/2016/01/amy_cuddy_s_power_pose_research_is_the_latest_example_of_scientific_overreach.html)
+- [Others](http://nymag.com/scienceofus/2016/09/a-helpful-rundown-of-psychologys-replication-crisis.html?mid=twitter-share-scienceofus)
+
+
+****
+
+![](./assets/this-is-fine.jpeg) <small>&mdash; @DrPrimestein <a href="https://twitter.com/DrPrimestein/status/770210303963463681">August 29, 2016</a></small>
+
+
+Lots of hand-wringing and soul-searching
+=============================================
+
+Some reactionary:
+
+- Replication creates an [industry for incompetent hacks](http://www.sciencedirect.com/science/article/pii/S002210311600007X).
+- Oh, great here come the [replication bullies](http://science.sciencemag.org/content/344/6186/788.summary).
+- And the [methodological terrorists](http://andrewgelman.com/2016/09/21/what-has-happened-down-here-is-the-winds-have-changed/).
+
+![](./assets/dumpster-fire.gif)
+
+***
+
+Some constructive:
+
+- What does a failed replication even mean?
+- [Everything is f'ed](https://hardsci.wordpress.com/2016/08/11/everything-is-fucked-the-syllabus/) -- so what else is new?
+
+
+
+
+I'm optimistic
+========================================================
+
+Better research practices are catching on.
+
+- Pre-registration
+- Power analyses
+- Meta-analytic tools to assess the health of a field
+- Better disclosure of other unanalyzed measurements
+- Etc.
+
+
+
+
+The crisis made me more aware of questionable research practices
+========================================================
+
+- HARKing (hypothesizing after results are known)
+  - Telling a story to fit the data.
+- Garden of forking data
+  - Conducting countless sub-tests and sub-analyses on the data
+- p-hacking
+  - Doing these tests in order to find a significant effect.
+- Selective reporting
+  - Reporting only the tests that yielded a significant result.
+- And so on.
+
+
+
+
+My response
+========================================================
+
+- I spend most my day analyzing already collected data, so I want to avoid those sins.
+- In particular, I want to level up my stats.
+- I want something besides statistical significance.
+  - p-values don't mean what you probably think they mean.
+  - Neither do confidence intervals.
+  - Statistical significance is not related to practical significance.
+
+
+December, 2015
+========================================================
+
+- I started reading Gelmand and Hill book.
+  - This is the book for the `arm` package.
+- It emphasizes estimation, uncertainty and simulation.
+- Midway through, the book pivots to Bayesian estimation.
+- I roll with it.
+
+***
+
+![](./assets/arm.jpeg)
+
+
+
+ARM
+========================================================
+title: false
+
+- I try to download the example BUGS scripts.
+
+> Use Stan instead.
+
+- Okay, I'll give it try...
+
+
+January 2016
+========================================================
+
+There is an influx of Bayesian tools for R.
+
+- I'm down the rabbit hole, writing Stan models to fit the models from the ARM book.
+- [Statistical Rethinking](http://xcelab.net/rm/statistical-rethinking/), a book that reteaches regression from a Bayesian perspective with R and Stan, is released (12/2015).
+- A new version of [brms](https://cran.r-project.org/web/packages/brms/index.html) is released (1/2016). This package converts R model code into Stan programs.
+- [RStanARM](https://cran.r-project.org/web/packages/rstanarm/index.html) is released (1/2016).
+- There is a blog post called ["R Users Will Now Inevitably Become Bayesians"](https://thinkinator.com/2016/01/12/r-users-will-now-inevitably-become-bayesians/)
+
+I eat all this up. I become a convert.
+
+
