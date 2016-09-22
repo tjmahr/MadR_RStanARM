@@ -18,28 +18,38 @@ library("ggplot2")
 ```
 
 
-
 Some math
 ========================================================
 type: section
 
 
-
-
-
-
-
-
-
-
-The Slide With The Theorem On It
+The Slide with the Theorem on it
 ========================================================
 
 I saw a creature, and it just _quacked_ at me! Was it a duck?
 
 $$ P(\mathrm{duck} \mid \mathrm{quacks}) = \frac{ P(\mathrm{quacks} \mid \mathrm{duck}) \, P(\mathrm{duck})}{P(\mathrm{quacks})} $$
 
-How plausible is some possibility given the data?
+* If it quacks like a duck...
+* and after taking into account how common ducks are and how often animals quack...
+* then it probably is a duck.
+
+
+Classifying emails
+========================================================
+
+$$ P(\mathrm{spam} \mid \mathrm{cialis}) = \frac{ P(\mathrm{cialis} \mid \mathrm{spam}) \, P(\mathrm{spam})}{P(\mathrm{cialis})} $$
+
+The two unconditional probabilities are base rates that need to be accounted for.
+
+$$ P(\mathrm{spam} \mid \mathrm{cialis}) = \frac{\mathrm{cialis\ freq.\ in\ spam} \, * \mathrm{spam\ rate}}{\mathrm{cialis\ freq.}} $$
+
+
+
+More generally
+========================================================
+
+How plausible is some hypothesis given the data?
 
 $$ P(\mathrm{hypothesis} \mid \mathrm{data}) = \frac{ P(\mathrm{data} \mid \mathrm{hypothesis}) \, P(\mathrm{hypothesis})}{P(\mathrm{data})} $$
 
@@ -58,19 +68,19 @@ iqs <- car::Burt$IQbio
 iqs
 ```
 
-IQs are scaled to have a population mean of 100 and an SD of 15.
+By design, IQs are scaled to have a population mean of 100 and an SD of 15.
 
-How well do these data fit that kind of bell curve?
+How well do these data *fit* that kind of bell curve?
 
 
-Density is a measure of likelihood
+Density is a measure of relative likelihood
 ========================================================
 left: 40%
 
-* Draw the data on a bell curve on a hypothetical bell curve a mean of 100 and
-  SD of 15.
+* Draw the data on a hypothetical bell curve with a mean of 100 and SD of 15.
 * Height of each point on the curve is the density around that point.
 * Higher density regions are more likely.
+* Data farther from center is less likely.
 
 ```{r, echo = FALSE}
 library("ggplot2")
@@ -89,7 +99,8 @@ iq_df <- function(mean, sd = 15) {
 p <- ggplot(iq_df(100, 15)) +
   aes(iq, density) +
   geom_line() +
-  geom_point(aes(x = iqs, y = dnorm(iqs, 100, 15)), data = data_frame(iqs))
+  geom_point(aes(x = iqs, y = dnorm(iqs, 100, 15)), data = data_frame(iqs)) +
+  geom_segment(aes(x = iqs, xend = iqs, y = 0, yend = dnorm(iqs, 100, 15)), data = data_frame(iqs))
 p
 ```
 
@@ -122,15 +133,16 @@ Likelihood
 ========================================================
 title: false
 
-Which mean fits the data the best? Below average 85, average 100, or above average 115?
+Which mean best fits the data? Below average IQ (85), average IQ (100), or above average IQ (115)?
 
-```{r}
+```{r, collapse = TRUE, comment = "#>"}
 sum(dnorm(iqs, 85, 15, log = TRUE))
 sum(dnorm(iqs, 100, 15, log = TRUE))
 sum(dnorm(iqs, 115, 15, log = TRUE))
 ```
 
-We just used a "maximum likelihood" criterion to choose among these alternatives!
+* The data fit best wihh the "average" average mean.
+* We just used a "maximum likelihood" criterion to choose among these alternatives!
 
 
 Likelihood
