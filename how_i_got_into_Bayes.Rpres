@@ -32,9 +32,6 @@ left: 50%
 - Approximately 36% of the studies are replicated.
 - On average, the effect size in the replication is half that of the original study.
 
-Most studies did not replicate, and the replicated effects were considerably
-smaller than the original effects.
-
 
 
 Reactions
@@ -55,20 +52,6 @@ No, this is business as usual.
 Any credible discipline has to do this kind of house-cleaning from time to time.
 
 
-It's still going...
-========================================================
-
-Some famous findings are failing to replicate.
-
-- [Ego depletion](https://www.youtube.com/watch?v=2MDNvKXdLEM)
-- [Facial feedback](http://www.slate.com/articles/health_and_science/cover_story/2016/08/can_smiling_make_you_happier_maybe_maybe_not_we_have_no_idea.html)
-- [Power pose](http://www.slate.com/articles/health_and_science/science/2016/01/amy_cuddy_s_power_pose_research_is_the_latest_example_of_scientific_overreach.html)
-- [Others](http://nymag.com/scienceofus/2016/09/a-helpful-rundown-of-psychologys-replication-crisis.html?mid=twitter-share-scienceofus)
-
-
-****
-
-![](./assets/this-is-fine.jpeg) <small>&mdash; @DrPrimestein <a href="https://twitter.com/DrPrimestein/status/770210303963463681">August 29, 2016</a></small>
 
 
 Lots of hand-wringing and soul-searching
@@ -77,8 +60,7 @@ Lots of hand-wringing and soul-searching
 Some reactionary:
 
 - Replication creates an [industry for incompetent hacks](http://www.sciencedirect.com/science/article/pii/S002210311600007X).
-- Oh, great here come the [replication bullies](http://science.sciencemag.org/content/344/6186/788.summary).
-- And the [methodological terrorists](http://andrewgelman.com/2016/09/21/what-has-happened-down-here-is-the-winds-have-changed/).
+- Here come the [methodological terrorists](http://andrewgelman.com/2016/09/21/what-has-happened-down-here-is-the-winds-have-changed/)!
 
 ![](./assets/dumpster-fire.gif)
 
@@ -91,23 +73,21 @@ Some constructive:
 
 
 
-
-I'm optimistic
+I'm in the business-as-usual camp, by the way
 ========================================================
 
 Better research practices are catching on.
 
 - Pre-registration
-- Power analyses
+- Power analyses and [other foresight](http://www.johndcook.com/blog/2010/05/13/statistical-autopsy/).
 - Meta-analytic tools to assess the health of a field
 - Better disclosure of other unanalyzed measurements
-- Etc.
 
 
-
-
-The crisis made me more aware of questionable research practices
+Crisis made me think more of questionable data analysis practices
 ========================================================
+
+Basically, unintentional acts and rituals to appease Statistical Significance gods.
 
 - HARKing (hypothesizing after results are known)
   - Telling a story to fit the data.
@@ -117,23 +97,27 @@ The crisis made me more aware of questionable research practices
   - Doing these tests in order to find a significant effect.
 - Selective reporting
   - Reporting only the tests that yielded a significant result.
-- And so on.
 
 
 
 
-My response
+
+
+My response to the crisis
 ========================================================
 
-- I spend most my day analyzing already collected data, so I want to avoid those sins.
-- In particular, I want to level up my stats.
-- I want something besides statistical significance.
-  - p-values don't mean what you probably think they mean.
+- Most of my work analyzes already collected data, so I want to avoid these errors.
+- I want to level up my stats and explore new techniques.
+  - Maybe more robust estimation techniques
+  - Maybe machine learning techniques to complement conventional analyses.
+- I want something less finicky than statistical significance.
+  - p-values don't mean what many people think they mean.
   - Neither do confidence intervals.
   - Statistical significance is not related to practical significance.
 
 
-December, 2015
+
+December 2015
 ========================================================
 
 - I started reading the Gelman and Hill book.
@@ -152,7 +136,7 @@ ARM
 ========================================================
 title: false
 
-- I try to download the example BUGS scripts.
+- I try to download the example BUGS scripts, but the page no longer has them...
 
 > Use Stan instead.
 
@@ -162,14 +146,21 @@ title: false
 January 2016
 ========================================================
 
-There is an influx of Bayesian tools for R.
+I'm down the rabbit hole, writing Stan models to fit the models from the ARM
+book, and there is an influx of Bayesian tools for R.
 
-- I'm down the rabbit hole, writing Stan models to fit the models from the ARM book.
 - [Statistical Rethinking](http://xcelab.net/rm/statistical-rethinking/), a book that reteaches regression from a Bayesian perspective with R and Stan, is released (12/2015).
 - A new version of [brms](https://cran.r-project.org/web/packages/brms/index.html) is released (1/2016). This package converts R model code into Stan programs.
 - [RStanARM](https://cran.r-project.org/web/packages/rstanarm/index.html) is released (1/2016).
 - There is a blog post called ["R Users Will Now Inevitably Become Bayesians"](https://thinkinator.com/2016/01/12/r-users-will-now-inevitably-become-bayesians/)
 
 I eat all this up. I become a convert.
+
+
+Long story short
+========================================================
+
+The crisis sparked my curiosity, and a bunch of new tools and resources made it
+really easy to get started with Bayesian stats.
 
 
