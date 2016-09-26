@@ -74,8 +74,10 @@ update_distribution <- function(df, data) {
 }
 
 # Create each sequence of data samples
-iq_sequence <- Map(seq, 1, seq_along(iqs)) %>%
-  lapply(function(xs) iqs[xs]) %>%
+data_sequence <- Map(seq, 1, seq_along(iqs)) %>%
+  lapply(function(xs) iqs[xs])
+
+iq_sequence <- data_sequence %>%
   purrr::map(~ update_distribution(df, .x))
 
 # include 0 data seen
@@ -111,6 +113,30 @@ df_fit
 #> # ... with 102,653 more rows, and 4 more variables: data_seen <dbl>,
 #> #   step <dbl>, alpha <dbl>, likelihood <dbl>
 
+# Also want a data-frame of the cumulative data-set as each new point is added.
+# This lets us plot a rug of raw data.
+data_sequence <- data_sequence %>% 
+  purrr::map_df(~ data_frame(iq = .x, data_seen = length(iq))) %>% 
+  group_by(data_seen) %>% 
+  mutate(step = max(data_seen), sequence = seq_along(data_seen), current = sequence == max(sequence)) %>% 
+  select(-sequence) %>% 
+  ungroup
+data_sequence
+#> # A tibble: 378 × 4
+#>       iq data_seen  step current
+#>    <int>     <int> <int>   <lgl>
+#> 1     82         1     1    TRUE
+#> 2     82         2     2   FALSE
+#> 3     80         2     2    TRUE
+#> 4     82         3     3   FALSE
+#> 5     80         3     3   FALSE
+#> 6     88         3     3    TRUE
+#> 7     82         4     4   FALSE
+#> 8     80         4     4   FALSE
+#> 9     88         4     4   FALSE
+#> 10   108         4     4    TRUE
+#> # ... with 368 more rows
+
 library("gganimate")
 
 # plot posterior of means, one line per sd level
@@ -121,12 +147,16 @@ p <- ggplot(df_fit) +
   xlab("possible mean") +
   ylab("posterior probability") +
   guides(alpha = FALSE) +
-  theme_grey(base_size = 14)
+  theme_grey(base_size = 14) + 
+  geom_rug(aes(x = iq, y = 0), data_sequence, sides = "b") + 
+  geom_rug(aes(x = iq, y = 0), filter(data_sequence, current), size = 1.5, 
+           sides = "b")
+
 animation::ani.options(interval = 1/10)
-g <- gg_animate(p,  ani.height = 400, ani.width = 600)
+g <- gg_animate(p,  ani.height = 400, ani.width = 640)
 # g
 gg_animate_save(g, filename = "./updating.gif", saver = "gif",
-                ani.height = 400, ani.width = 600)
+                ani.height = 400, ani.width = 640)
 #> Executing: 
 #> ""convert" -loop 0 -delay 10 Rplot1.png Rplot2.png Rplot3.png
 #>     Rplot4.png Rplot5.png Rplot6.png Rplot7.png Rplot8.png
@@ -148,10 +178,10 @@ p <- ggplot(df_fit) +
   guides(alpha = FALSE) +
   theme_grey(base_size = 14)
 
-g2 <- gg_animate(p,  ani.height = 400, ani.width = 600)
+g2 <- gg_animate(p,  ani.height = 400, ani.width = 640)
 
 gg_animate_save(g2, filename = "./updating_sds.gif", saver = "gif",
-                ani.height = 400, ani.width = 600)
+                ani.height = 400, ani.width = 640)
 #> Executing: 
 #> ""convert" -loop 0 -delay 10 Rplot1.png Rplot2.png Rplot3.png
 #>     Rplot4.png Rplot5.png Rplot6.png Rplot7.png Rplot8.png
@@ -163,20 +193,20 @@ gg_animate_save(g2, filename = "./updating_sds.gif", saver = "gif",
 #> Output at: updating_sds.gif
 
 p <- iq_sequence %>%
-  bind_rows %>% 
+  bind_rows %>%
   ggplot(.) +
-  aes(x = each_mean, y = each_sd, z = posterior, group = data_seen, frame = data_seen) + 
-  geom_contour() + 
+  aes(x = each_mean, y = each_sd, z = posterior, group = data_seen, frame = data_seen) +
+  geom_contour() +
   ggtitle("Data observed:") +
   xlab("possible mean") +
   ylab("possible sd")
-g3 <- gg_animate(p, ani.height = 400, ani.width = 600)
+g3 <- gg_animate(p, ani.height = 400, ani.width = 640)
 #> Warning in grDevices::contourLines(x = sort(unique(data$x)), y =
 #> sort(unique(data$y)), : all z values are equal
 #> Warning: Not possible to generate contour data
 
 gg_animate_save(g3, filename = "./updating_contour.gif", saver = "gif",
-                ani.height = 400, ani.width = 600)
+                ani.height = 400, ani.width = 640)
 #> Executing: 
 #> ""convert" -loop 0 -delay 10 Rplot1.png Rplot2.png Rplot3.png
 #>     Rplot4.png Rplot5.png Rplot6.png Rplot7.png Rplot8.png
