@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
   out.width = "70%"
 )
 library(dplyr, warn.conflicts = FALSE)
-library("ggplot2")
+library(ggplot2)
 ```
 
 
@@ -130,7 +130,6 @@ left: 40%
 * Data farther from center is less likely.
 
 ```{r, echo = FALSE}
-library("ggplot2")
 iq_df <- function(mean, sd = 15, xs = iqs) {
   data_frame(
     iq = seq(min(xs), max(xs), length.out = 100),
@@ -474,13 +473,14 @@ combination of predictor variables (just $x_1$ for now).
 
 
 
+
 Basically
 ====================================================================================================
 
 For a model of weight predicted by height... but with continuous bell curves. A bell tunnel through the data.
 
 ```{r staggered-bell-curves, echo = FALSE, fig.cap = "Scatter plot with bell curves overlaid to how the shape of the density remains the same. It's just the center that moves with x. "}
-library("ggplot2")
+library(ggplot2)
 
 # Some toy data
 davis <- car::Davis %>%
@@ -544,7 +544,9 @@ $$ P(\alpha, \beta, \sigma \mid x) = \frac{ P(x \mid \alpha, \beta, \sigma) \, P
 
 Things get gnarly. This is the black-box step.
 
-We don't perform this integral calculus. Instead, we rely on Markov-chain Monte Carlo simulation to get us samples from the posterior. Those samples will provide a detailed picture of the posterior.
+We don't perform this integral calculus. Instead, we rely on Markov-chain Monte
+Carlo simulation to get us samples from the posterior. Those samples will
+provide a detailed picture of the posterior.
 
 Enter Stan.
 
