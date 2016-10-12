@@ -1,0 +1,550 @@
+Bayesian Regression Models with RStanARM
+===============================================================================
+author: Tristan Mahr
+date: Sept. 21, 2016
+autosize: true
+incremental: false
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  fig.asp = 0.618,
+  fig.width = 6,
+  dpi = 300,
+  fig.align = "center",
+  out.width = "70%"
+)
+library(dplyr, warn.conflicts = FALSE)
+library("ggplot2")
+```
+
+
+
+
+Overview
+===============================================================================
+
+- How I got into Bayesian statistics
+- **Some intuition-building about Bayes theorem**
+- Tour of RStanARM
+- Where to learn more about Bayesian statistics
+
+
+
+
+Building mathematical intuitions
+===============================================================================
+type: section
+
+
+
+
+Caveat
+===============================================================================
+
+* These slides and these examples are meant to illustrate the pieces of Bayes
+  theorem.
+* This is not a rigorous mathematical description of Bayesian probability
+  or regression.
+
+
+
+
+Classifying emails
+===============================================================================
+
+I got an email with the word "cialis" in it. Is it spam?
+
+$$ P(\mathrm{spam} \mid \mathrm{cialis}) = \frac{ P(\mathrm{cialis} \mid \mathrm{spam}) \, P(\mathrm{spam})}{P(\mathrm{cialis})} $$
+
+
+
+
+Email example
+===============================================================================
+title: false
+
+The two unconditional probabilities are base rates that need to be accounted for.
+
+$$ P(\mathrm{spam} \mid \mathrm{cialis}) = \frac{\mathrm{cialis\ freq.\ in\ spam} \, * \mathrm{spam\ rate}}{\mathrm{cialis\ freq.}} $$
+
+This example is just counting events. We can think more broadly about the
+probabilities.
+
+
+
+Another example
+===============================================================================
+title: false
+
+I saw a creature, and it just _quacked_ at me! Was it a duck?
+
+$$ P(\mathrm{duck} \mid \mathrm{quacks}) = \frac{ P(\mathrm{quacks} \mid \mathrm{duck}) \, P(\mathrm{duck})}{P(\mathrm{quacks})} $$
+
+* If it quacks like a duck...
+* and after taking into account how common ducks are and
+  how often animals quack...
+* then it probably is a duck.
+
+
+
+General structure
+===============================================================================
+
+How plausible is some hypothesis given the data?
+
+$$ P(\mathrm{hypothesis} \mid \mathrm{data}) = \frac{ P(\mathrm{data} \mid \mathrm{hypothesis}) \, P(\mathrm{hypothesis})}{P(\mathrm{data})} $$
+
+Pieces of the equation:
+
+$$ \mathrm{posterior} = \frac{ \mathrm{likelihood} * \mathrm{prior}}{\mathrm{average\ likelihood}} $$
+
+
+
+
+Likelihood measures fit
+===============================================================================
+
+We found some IQ scores in an old, questionable dataset.
+
+```{r, width = 35, comment = "#>", collapse = TRUE}
+library(dplyr)
+iqs <- car::Burt$IQbio
+iqs
+```
+
+IQs are designed to have a normal distribution with a population mean of 100
+and an SD of 15.
+
+How well do these data *fit* in that kind of bell curve?
+
+
+
+
+Density is a measure of relative likelihood
+===============================================================================
+left: 40%
+
+* Draw the data on a hypothetical bell curve with a mean of 100 and SD of 15.
+* Height of each point on curve is density around that point.
+* Higher density regions are more likely.
+* Data farther from center is less likely.
+
+```{r, echo = FALSE}
+library("ggplot2")
+iq_df <- function(mean, sd = 15, xs = iqs) {
+  data_frame(
+    iq = seq(min(xs), max(xs), length.out = 100),
+    density = dnorm(iq, mean, 15),
+    mean = mean,
+    sd = sd)
+}
+```
+
+***
+
+```{r iq-density-bell-curve, echo = FALSE, fig.cap = "Density of IQ scores drawn a bell curve with mean 100."}
+p <- ggplot(iq_df(100, 15)) +
+  aes(iq, density) +
+  geom_line() +
+  geom_point(aes(x = iqs, y = dnorm(iqs, 100, 15)), data = data_frame(iqs)) +
+  geom_segment(aes(x = iqs, xend = iqs, y = 0, yend = dnorm(iqs, 100, 15)),
+               data = data_frame(iqs))
+p
+```
+
+
+
+
+Bad likelihood example
+===============================================================================
+title: false
+
+In comparison, the data are less likely in a bell curve with a mean of 130.
+
+```{r iq-density-bell-curve-2, echo = FALSE, fig.cap = "Density of IQ scores drawn a bell curve with mean 130. The fit is terrible."}
+bad_mean <- 130
+
+p <- ggplot(iq_df(bad_mean, 15)) +
+  aes(iq, density) +
+  geom_line() +
+  geom_point(aes(x = iqs, y = dnorm(iqs, bad_mean, 15)), data = data_frame(iqs)) +
+  geom_segment(aes(x = iqs, xend = iqs, y = 0, yend = dnorm(iqs, bad_mean, 15)),
+               data = data_frame(iqs))
+p
+```
+
+
+
+
+Likelihood
+===============================================================================
+title: false
+
+Density function `dnorm(xs, mean = 100, sd = 15)` tells us the height of each
+value in `xs` when drawn on a normal bell curve.
+
+```{r, comment = "#>", collapse = TRUE}
+# likelihood (density) of each point
+dnorm(iqs, 100, 15) %>% round(3)
+```
+
+Likelihood of all points is the product. These quantities get vanishingly small
+[so we sum their logs instead][math-ex-ll]. (Hence, _log-likelihoods_.)
+
+```{r, comment = "#>", collapse = TRUE}
+# vanishingly small!
+prod(dnorm(iqs, 100, 15))
+
+# log scale
+sum(dnorm(iqs, 100, 15, log = TRUE))
+```
+
+[math-ex-ll]: https://math.stackexchange.com/questions/892832/why-we-consider-log-likelihood-instead-of-likelihood-in-gaussian-distribution
+
+
+
+
+Maximum likelihood example
+===============================================================================
+title: false
+
+Log-likelihoods provide a measure of how well the data fit a given normal
+distribution.
+
+Which mean best fits the data? Below average IQ (85), average IQ (100), or above
+average IQ (115)?
+
+```{r, collapse = TRUE, comment = "#>"}
+sum(dnorm(iqs, 85, 15, log = TRUE))
+sum(dnorm(iqs, 100, 15, log = TRUE))
+sum(dnorm(iqs, 115, 15, log = TRUE))
+```
+
+The data fit best with the "population average" mean (100).
+
+We just used a _maximum likelihood_ criterion to choose among these
+alternatives!
+
+
+
+
+Likelihood summary
+===============================================================================
+
+- We have some model of how the data could be generated. This model has
+  tuneable parameters.
+  - "The IQs are drawn from a normal distribution with an SD of 15 and some
+    unknown mean."
+- Likelihood is how well the observed data fit in a particular data-generating
+  model.
+- Classical regression's "line of best fit" finds model parameters that
+  maximize the likelihood of the data.
+
+
+
+
+Bayesian models
+===============================================================================
+
+$$ \mathrm{posterior} = \frac{ \mathrm{likelihood} * \mathrm{prior}}{\mathrm{average\ likelihood}} $$
+
+A Bayesian model examines a distribution over model parameters. What are all the
+plausible ways the data could have been generated?
+
+- Prior: A probability distribution over model parameters.
+- Update our prior information in proportion to how well the data fits with
+  that information.
+
+
+
+
+Bayesian updating
+===============================================================================
+
+Let's consider all integer values from 70 to 130 as equally probable means for
+the IQs. This is a uniform prior.
+
+```{r, comment = "#>", collapse = TRUE}
+# Keep track of last probability value
+df_iq_model <- data_frame(
+  mean = 70:130,
+  prob = 1 / length(mean),
+  previous = NA_real_)
+sum(df_iq_model$prob)
+```
+
+***
+
+```{r, comment = "#>", collapse = TRUE}
+df_iq_model
+```
+
+
+
+
+More IQs: No data
+===============================================================================
+title: false
+
+```{r iq-00-data, echo = FALSE}
+ggplot(df_iq_model) +
+  aes(x = mean, y = prob) +
+  geom_line() +
+  ylim(c(0, .10)) +
+  xlab("possible mean") +
+  ylab("probability") +
+  ggtitle("Data observed: 0")
+```
+
+
+
+
+Observe 1 value
+===============================================================================
+title: false
+
+We observe one data-point and update our prior information using the likelihood
+of the data at each mean.
+
+```{r, comment = "#>", collapse = TRUE}
+df_iq_model$previous <- df_iq_model$prob
+likelihoods <- dnorm(iqs[1], df_iq_model$mean, 15)
+# numerator of bayes theorem
+df_iq_model$prob <- likelihoods * df_iq_model$prob
+sum(df_iq_model$prob)
+```
+
+That's not right. We need the *average likelihood* to ensure that the
+probabilities add up to 1. This is why it's sometimes called a *normalizing
+constant*.
+
+```{r, comment = "#>", collapse = TRUE}
+# include denominator of bayes theorem
+df_iq_model$prob  <- df_iq_model$prob / sum(df_iq_model$prob)
+sum(df_iq_model$prob)
+```
+
+
+
+
+Plot of observing 1 value
+===============================================================================
+title: false
+
+```{r iq-01-data, echo = FALSE, fig.cap = "Bayesian updating after 1 observation. Previous probabilites are drawn for reference."}
+ggplot(df_iq_model) +
+  aes(x = mean, y = prob) +
+  geom_line() +
+  geom_line(aes(y = previous), linetype = "dashed") +
+  geom_rug(aes(x = iqs, y = iqs), data_frame(iqs = iqs[1]), sides = "b",
+           size = 1.2) +
+  ylim(c(0, .10)) +
+  xlab("possible mean") +
+  ylab("probability") +
+  ggtitle("Data observed: 1")
+```
+
+
+
+
+Observe 2 values
+===============================================================================
+title: false
+
+We observe another data-point and update the probability with the likelihood
+again.
+
+```{r, comment = "#>", collapse = TRUE}
+df_iq_model$previous <- df_iq_model$prob
+likelihoods <- dnorm(iqs[2], df_iq_model$mean, 15)
+df_iq_model$prob <- likelihoods * df_iq_model$prob
+# normalize
+df_iq_model$prob <- df_iq_model$prob / sum(df_iq_model$prob)
+df_iq_model
+```
+
+
+
+
+Plot of observing 2 values
+===============================================================================
+title: false
+
+```{r iq-02-data, echo = FALSE, fig.cap = "Bayesian updating after 2 observations"}
+ggplot(df_iq_model) +
+  aes(x = mean, y = prob) +
+  geom_line() +
+  geom_line(aes(y = previous), linetype = "dashed") +
+  geom_rug(aes(x = iqs, y = iqs), data_frame(iqs = iqs[1:2]), sides = "b") +
+  geom_rug(aes(x = iqs, y = iqs), data_frame(iqs = iqs[2]), sides = "b",
+           size = 1.2) +
+  ylim(c(0, .10)) +
+  xlab("possible mean") +
+  ylab("probability") +
+  ggtitle("Data observed: 2")
+```
+
+
+
+
+Observe 3 values
+===============================================================================
+title: false
+
+And one more...
+
+```{r, comment = "#>", collapse = TRUE}
+df_iq_model$previous <- df_iq_model$prob
+likelihoods <- dnorm(iqs[3], df_iq_model$mean, 15)
+df_iq_model$prob <- likelihoods * df_iq_model$prob
+# normalize
+df_iq_model$prob <- df_iq_model$prob / sum(df_iq_model$prob)
+df_iq_model
+```
+
+
+
+
+Plot of observing 3 values
+===============================================================================
+title: false
+
+```{r iq-03-data, echo = FALSE, fig.cap = "Bayesian updating after 3 observations"}
+ggplot(df_iq_model) +
+  aes(x = mean, y = prob) +
+  geom_line() +
+  geom_line(aes(y = previous), linetype = "dashed") +
+  geom_rug(aes(x = iqs, y = iqs), data_frame(iqs = iqs[1:3]), sides = "b") +
+  geom_rug(aes(x = iqs, y = iqs), data_frame(iqs = iqs[3]), sides = "b",
+           size = 1.2) +
+  ylim(c(0, .10)) +
+  xlab("possible mean") +
+  ylab("probability") +
+  ggtitle("Data observed: 3")
+```
+
+
+
+
+Animation!
+================================================================================
+
+![Gif of the probabilities updating for the whole dataset](./assets/simple-updating.gif)
+
+
+
+
+
+
+
+Recap
+===============================================================================
+
+- We have some model of how the data could be generated. This model has tuneable
+  parameters.
+- We have some prior distribution over plausible values for the parameters.
+- Likelihood is how well the data fit in a model with a certain set of
+  parameters.
+- We explore all the plausible ways the data could be generated by the model and
+  those parameters, and we update our prior information based on the fit of the
+  data.
+- We update our prior information based on the fit of the data.
+
+
+
+
+Basic regression model
+===============================================================================
+
+We want to estimate a response $y$ with 1 predictor $x_1$.
+
+$$
+\begin{align*}
+   y_i &\sim \mathrm{Normal}(\mathrm{mean} = \mu_i, \mathrm{SD} = \sigma)
+   \\
+  \mu_i &= \alpha + \beta_1*x_{1i}
+\end{align*}
+$$
+
+Data generating model: Observation $y_i$ is a draw from a normal distribution
+centered around a mean $\mu_i$ with a standard deviation of $\sigma$.
+
+We estimate the mean with a constant "intercept" term $\alpha$ plus a linear
+combination of predictor variables (just $x_1$ for now).
+
+
+
+Basically
+====================================================================================================
+
+For a model of weight predicted by height... but with continuous bell curves. A bell tunnel through the data.
+
+```{r staggered-bell-curves, echo = FALSE, fig.cap = "Scatter plot with bell curves overlaid to how the shape of the density remains the same. It's just the center that moves with x. "}
+library("ggplot2")
+
+# Some toy data
+davis <- car::Davis %>%
+  filter(100 < height)
+
+# Fit a model and estimate mean at five points
+m <- lm(weight ~ height, davis)
+newdata <- data_frame(height = c(15:19 * 10))
+newdata$fit <- predict(m, newdata)
+
+# get density of random normal values
+get_density_df <- function(mean, sd, steps) {
+  ends <- qnorm(c(.001, .999), mean, sd)
+  steps <- seq(ends[1], ends[2], length.out = steps)
+
+  df <- data_frame(
+    value = steps,
+    density = dnorm(steps, mean, sd))
+  df
+}
+
+# Get a distribution at each mean
+simulated <- newdata %>%
+  group_by(height) %>%
+  do(get_density_df(.$fit, sigma(m), 10000)) %>%
+  ungroup
+
+ggplot(simulated) +
+  # Plot at each mean, adding some scaled value of density to the mean.
+  aes(x = height - (100 * density), y = value, group = height) +
+  geom_polygon(fill = "grey50") +
+  # raw data
+  geom_point(aes(height, weight), data = davis) +
+  labs(x = "height (cm)", y = "weight (kg)")
+```
+
+
+
+
+Bayesian stats
+===============================================================================
+
+Parameters we need to estimate for regression: $\alpha, \beta_1, \sigma$
+
+- A classical model provides one model of many plausible models of the data.
+  It'll find the parameters that maximize likelihood.
+- A Bayesian model is a model of models. We get a *distribution of models* that
+  are consistent with the data.
+
+
+
+
+This is where things get difficult
+===============================================================================
+
+Parameters we need to estimate: $\alpha, \beta_1, \sigma$
+
+$$ \mathrm{posterior} = \frac{ \mathrm{likelihood} * \mathrm{prior}}{\mathrm{average\ likelihood}} $$
+
+$$ P(\alpha, \beta, \sigma \mid x) = \frac{ P(x \mid \alpha, \beta, \sigma) \, P(\alpha, \beta, \sigma)}{\iiint \, P(x \mid \alpha, \beta, \sigma) \, P(\alpha, \beta, \sigma) \,d\alpha \,d\beta \,d\sigma} $$
+
+Things get gnarly. This is the black-box step.
+
+We don't perform this integral calculus. Instead, we rely on Markov-chain Monte Carlo simulation to get us samples from the posterior. Those samples will provide a detailed picture of the posterior.
+
+Enter Stan.
+
