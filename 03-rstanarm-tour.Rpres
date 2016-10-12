@@ -1,9 +1,9 @@
 Bayesian Regression Models with RStanARM
-========================================================
+===============================================================================
 author: Tristan Mahr
 date: Sept. 21, 2016
 autosize: true
-incremental: true
+incremental: false
 
 ```{r, echo = FALSE}
 knitr::opts_chunk$set(
@@ -11,37 +11,56 @@ knitr::opts_chunk$set(
   fig.width = 6,
   dpi = 300,
   fig.align = "center",
-  out.width = "70%"
+  out.width = "70%",
+  comment = "#>",
+  collapse = TRUE
 )
-library("dplyr", warn.conflicts = FALSE)
-library("ggplot2")
+library(dplyr, warn.conflicts = FALSE)
+library(ggplot2)
 ```
 
 
 
+
+Overview
+===============================================================================
+
+- How I got into Bayesian statistics
+- Some intuition-building about Bayes theorem
+- **Tour of RStanARM**
+- Where to learn more about Bayesian statistics
+
+
+
+
 Tour of RStanARM
-========================================================
+===============================================================================
 type: section
 
 
 
+
 Software ecosystem
-========================================================
+===============================================================================
 type: sub-section
 
 
+
+
 What is Stan?
-========================================================
+===============================================================================
 
 - A programming language for probablistic stats.
 - Write out a description of the data and model using a mathy syntax.
 - The model is _compiled_ into an executable that does the sampling.
-- Pystan and RStan are interfaces that help you send/receive data to/from Stan models.
+- Pystan and RStan are interfaces that help you send/receive data to/from Stan
+  models.
+
 
 
 
 Simple Regression Model in Stan
-========================================================
+===============================================================================
 
 ```{r, eval = FALSE}
 # R version
@@ -72,67 +91,78 @@ generated quantities {
 }
 ```
 
+
+
+
 Take aways
-========================================================
+===============================================================================
 
 * Program is a description of the data and a model.
-* The language wants a little more information about the data (type, length, bounds), presumably for more efficient sampling.
+* Language wants a more formal information about the data (type, length,
+  bounds), presumably for more efficient sampling.
 * The tilde operator `~` is a sampling statement.
 
 
 
-Another language?
-========================================================
 
-Ugh, I don't want to learn a whole new programming language right now.
+Another language?
+===============================================================================
+
+![Gif of Princess Leia saying "no thanks"](./assets/no-thanks.gif)
 
 
 
 
 RStanARM
-========================================================
+===============================================================================
 type: sub-section
 
 
 
 
 What is RStanArm?
-========================================================
+===============================================================================
 
-- RStan Applied Regression Modeling (proper successor to the arm package)
+RStan Applied Regression Modeling
+
 - Batteries-included, precompiled versions of common regression models.
 - `glm` -> `stan_glm`, `glmer` -> `stan_glmer`.
 - Write your regular code. Add `stan_` to the front, and add a prior.
 - [CRAN page](https://cran.r-project.org/web/packages/rstanarm/)
-
-
-
+  - Very good! They have lots of detailed vignettes!
+- Proper successor to the `arm` package.
 
 
 
 
 An example: Height and Weight by Sex
-========================================================
+===============================================================================
 
 ```{r}
 # Some toy data
 davis <- car::Davis %>% filter(100 < height) %>% as_data_frame
+
 davis
 ```
 
 
+
+
 Classical model: Summary
-==================
+===============================================================================
 
 ```{r, digits = 2}
 model <- lm(weight ~ height * sex, davis)
 summary(model) %>% print(digits = 2)
 ```
 
-Classical model: Predicted mean over x
-==================
 
-```{r davis-classical, echo = FALSE}
+
+
+Classical model: Predicted mean over x
+===============================================================================
+
+```{r davis-classical, echo = FALSE, fig.cap = "Scatterplot of height/weight, colored by sex, with model-predicted mean for each group drawn."}
 plot_limits <- davis %>%
   group_by(sex) %>%
   filter(height %in% range(height, na.rm = TRUE)) %>%
@@ -147,18 +177,23 @@ p1 <- ggplot(davis) +
 p1
 ```
 
+
+
+
 Fitting the model with RStanARM
-==================
+===============================================================================
 type: sub-section
 
 
+
+
 Load the package
-==================
+===============================================================================
 
 ```{r}
 library("rstanarm")
 #> Loading required package: Rcpp
-#> rstanarm (Version 2.11.1, packaged: 2016-07-29 14:31:44 UTC)
+#> rstanarm (Version 2.12.1, packaged: 2016-09-12 13:08:24 UTC)
 #> - Do not expect the default priors to remain the same in future rstanarm versions.
 #> Thus, R scripts should specify priors explicitly, even if they are just the defaults.
 #> - For execution on a local, multicore CPU with excess RAM we recommend calling
@@ -170,8 +205,10 @@ library("rstanarm")
   than a minute to fit.
 
 
+
+
 Fit the model
-==================
+===============================================================================
 class: scrollable-slide
 incremental: false
 
@@ -181,7 +218,7 @@ incremental: false
   * Each chain is 2000 samples, but the first half are warm-up samples.
   * The warm-up samples are ignored.
 
-```{r stan-davis, cache = TRUE}
+```{r stan-davis, cache = FALSE}
 stan_model <- stan_glm(
   weight ~ height * sex,
   data = davis,
@@ -193,16 +230,21 @@ stan_model <- stan_glm(
 ```
 
 
+
+
 First look: Just printing the model object
-==================
+===============================================================================
 incremental: false
 
 ```{r}
 stan_model
 ```
 
-First look: Getting a summary from the model
-==================
+
+
+
+Getting a summary from the model
+===============================================================================
 class: scrollable-slide
 incremental: false
 
@@ -212,47 +254,94 @@ summary(stan_model)
 ```
 
 
-First look: Getting a summary from the model
-==================
-class: scrollable-slide
-incremental: false
-
-- We now have post-data probabilities.
-- Based on our prior information and the data, there is 95% probability that a parameter value is in its 95% interval.
-
-```{r}
-summary(stan_model)
-# comment to make the bottom of the output visible
-```
 
 
 More on summary()
-===================
+===============================================================================
 
 * Split into estimation and diagnostic information
 * `mean_PPD` is the predicted value for a completely average observation
 
 
-Plotting the parameters
-===================
-incremental: false
+
+
+Inspecting the posterior samples
+===============================================================================
+type: sub-section
+
+
+
+
+Looking at the posterior parameter samples
+===============================================================================
+
+Coerce to a data-frame. One row per posterior sample.
 
 ```{r}
+samples <- stan_model %>% as.data.frame %>% tbl_df
+samples
+```
+
+
+
+
+Looking at the posterior parameter samples
+===============================================================================
+title: false
+
+```{r histogram-of-height-effect, fig.cap = "Histogram of height effect."}
+ggplot(samples) + aes(x = height) + geom_histogram()
+```
+
+
+
+
+Quantiles are post-data probabilities
+===============================================================================
+class: scrollable-slide
+incremental: false
+
+- If we believe there is a "true" value for each parameter, there is 90%
+  probability that this "true" value is in the 90% interval, given our model,
+  prior information, and the data.
+- The 90% interval contains the middle 90% of the parameter values.
+  - There is a 5% chance, says the model, the height parameter is below the
+    5% quantile.
+
+```{r}
+posterior_interval(stan_model)
+```
+
+
+
+
+Plotting the parameters
+===============================================================================
+incremental: false
+
+Basic `plot()` method shows 80% and 95% intervals.
+
+```{r basic-parameter-plot, fig.cap = "Basic plot() called on model. Shows 80%, 95% intervals for each parameter."}
 plot(stan_model)
 ```
 
+
+
+
 Plotting some of the parameters
-===================
+===============================================================================
 incremental: false
 
-```{r}
+```{r subset-of-parameters, fig.cap = "Basic plot() called on model. Shows 80%, 95% intervals. Limited to just parameters matching 'height'."}
 # Match a subset of the parameters
 plot(stan_model, regex_pars = "height")
 ```
 
 
+
+
 Exploring with ShinyStan
-==================
+===============================================================================
 incremental: false
 
 This thing is pretty awesome.
@@ -261,9 +350,13 @@ This thing is pretty awesome.
 launch_shinystan(stan_model)
 ```
 
+[_Demo outside of slides._]
 
-Things to see in ShinyStan
-==================
+
+
+
+Things I just demonstrated in ShinyStan
+===============================================================================
 incremental: false
 
 - Diagnostics
@@ -278,93 +371,12 @@ incremental: false
   - Bivariate view
 
 
-Priors
+
+
+Plotting model results
 ===============================================================================
+type: sub-section
 
-- The prior `normal(0, 5)` gets rescaled to match each predictor variable.
-- This rescaling is [not well documented](https://groups.google.com/forum/#!category-topic/stan-users/rstanarm/_y6aDbkdANw).
-- Some options
-  - `scale()` our measurements so that they are [scale free](https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations) (with mean = 0 and SD = 1).
-  - Sample from the prior to see what kinds of values are generated by our priors.
-
-
-Sampling from the prior: posterior_vs_prior()
-===============================================================================
-incremental: false
-
-RStanARM will compare samples from the posterior and the prior.
-
-```{r, results = 'hide'}
-posterior_vs_prior(stan_model)
-```
-
-
-
-
-Sampling from the prior: posterior_vs_prior()
-===============================================================================
-title: false
-incremental: false
-
-```{r, results = 'hide'}
-# Select just parameters with "height" in the name
-posterior_vs_prior(stan_model, regex_pars = "height")
-```
-
-
-
-
-
-Sampling from the prior: posterior_vs_prior()
-===============================================================================
-title: false
-incremental: false
-class: scrollable-slide
-
-```{r, cache = TRUE, results = 'hide'}
-comparison <- posterior_vs_prior(
-  stan_model,
-  group_by_parameter = TRUE,
-  facet_args = list(scales = "free_y"),
-  prob = .95)
-
-comparison + theme_grey() + guides(color = FALSE)
-```
-
-
-
-Sampling from  the prior: prior_PD = TRUE
-===============================================================================
-incremental: false
-
-We can also sample from the prior directly.
-
-```{r, cache = TRUE, results = 'hide'}
-stan_model_prior <- stan_glm(
-  weight ~ height * sex,
-  data = davis,
-  family = gaussian,
-  prior = normal(0, 5),
-  prior_intercept = normal(0, 10),
-  prior_PD = TRUE
-)
-```
-
-
-Sampling the prior: prior_PD = TRUE
-==============
-title: false
-incremental: false
-class: scrollable-slide
-
-Our initial prior says that an increase in height of 1 cm may predict a 0 +/-
-7 kg increase in weight in women. This is a very generous interval for this
-effect!
-
-```{r}
-summary(stan_model_prior)
-# comment
-```
 
 
 
@@ -419,22 +431,29 @@ p2 <- ggplot(davis) +
 ```
 
 
+
+
 The "Pile of Lines" Plot
 ===============================================================================
 title: false
 
-```{r, echo = FALSE}
+```{r pile-of-lines, echo = FALSE, fig.cap = "Pile of lines plot. Scatter plot of height and weight. One thick line for each group's posterior median. 200 other lines, drawn from posterior, for each group also drawn."}
 p2
 ```
 
 
+
+
 The "Pile of Lines" Plot
 ===============================================================================
 title: false
 
-- Depicts uncertainty by drawing line of best fit plus many other plausible regression lines.
+- Depicts uncertainty by drawing line of best fit plus many other plausible
+  regression lines.
 - Visualization works best when there is only one group and we don't mind having
   regression lines stretch past the range of the data.
+
+
 
 
 The "Line + Prediction Interval"  Plot
@@ -464,20 +483,11 @@ new_data <- bind_rows(df_f, df_m) %>% tibble::rownames_to_column("Observation")
 ```
 
 ```{r}
-# do some stuff
+# # do some stuff
 # ...
-```
 
-```{r}
 new_data
 ```
-
-
-
-
-
-
-
 
 
 
@@ -486,13 +496,17 @@ Get the predicted mean for each point
 ===============================================================================
 
 With the normal `predict()` function on a classical regression model, we get the
-expected mean ($\mu_i$) for each row in `newdata`. With `posterior_linpred()`, we get the
-same thing, but for each of the 4000 posterior samples.
+expected mean ($\mu_i$) for each row in `newdata`.
+
+With `posterior_linpred()`, we get the same thing, but for each of the 4000
+posterior samples.
 
 ```{r}
 linpreds <- posterior_linpred(stan_model, newdata = new_data)
 dim(linpreds)
 ```
+
+
 
 Get the predicted mean for each point
 ===============================================================================
@@ -504,6 +518,7 @@ tidy_linpreds <- linpreds %>%
   as_data_frame %>%
   tibble::rownames_to_column("Draw") %>%
   tidyr::gather(Observation, Value, -Draw)
+
 tidy_linpreds
 ```
 
@@ -522,11 +537,12 @@ df_predictions <- tidy_linpreds %>%
             ymin = quantile(Value, .025),
             ymax = quantile(Value, .975)) %>%
   left_join(new_data)
+
 df_predictions
 ```
 
 
-Now, we can plot the predictions of the mean
+Now, we can plot predicted means
 ===============================================================================
 
 ```{r}
@@ -540,28 +556,27 @@ p3 <- ggplot(davis) +
 ```
 
 
-Now, we can plot the predictions of the mean
+Now, we can plot predicted means
 ===============================================================================
 title: false
 
-```{r, echo = FALSE}
+```{r posterior-linpred-plot, echo = FALSE, fig.cap = "Scatterplot of data with plot of predicted means and 95% credible intervals for each sex."}
 p3
 ```
+
+
 
 Limitations of this approach
 ===============================================================================
 
-* RStanARM does not like `posterior_linpred()`.
+RStanARM does not like `posterior_linpred()`.
 
 > **See also**: `posterior_predict` to draw from the posterior predictive
 > distribution of the outcome, which is almost always preferable.
 
-* We have samples of the error term `sigma` and we're not using them.
-
-
-
-
-
+<br/>
+Why? Because we have samples of the error term `sigma`, and we're not using
+them!
 
 
 
@@ -571,7 +586,6 @@ Get the model to generate new observations
 
 Same plan as before, but use `posterior_predict()` to get predictions for
 observations ($y_i$), instead of estimates of the mean ($\mu_i$).
-
 
 ```{r}
 # ?posterior_predict
@@ -591,6 +605,7 @@ tidy_preds <- preds %>%
   as_data_frame %>% setNames(seq_len(ncol(.))) %>%
   tibble::rownames_to_column("Draw") %>%
   tidyr::gather(Observation, Value, -Draw)
+
 tidy_preds
 ```
 
@@ -608,6 +623,7 @@ df_predictions <- tidy_preds %>%
             ymin = quantile(Value, .025),
             ymax = quantile(Value, .975)) %>%
   left_join(new_data)
+
 df_predictions
 ```
 
@@ -642,6 +658,10 @@ p4
 
 
 
+Model comparison
+===============================================================================
+type: sub-section
+
 
 
 
@@ -674,6 +694,7 @@ model_list <- list(
   inter = model)
 
 model_list %>% lapply(AIC) %>% unlist
+
 model_list %>% lapply(BIC) %>% unlist
 ```
 
@@ -681,6 +702,8 @@ model_list %>% lapply(BIC) %>% unlist
 
 Classical model comparison
 ===============================================================================
+
+Or with `anova()`.
 
 ```{r}
 anova(model_no_group, model_no_inter, model)
@@ -690,8 +713,8 @@ anova(model_no_group, model_no_inter, model)
 Approximate Leave One Out Cross Validation
 ===============================================================================
 
-For RStanARM, we compare the models by using approximation leave-one-out cross-
-validation. The details are outside of the scope of this talk.
+For RStanARM, we compare the models by using approximation leave-one-out
+cross-validation. The details are outside of the scope of this talk.
 
 ```{r, cache = TRUE}
 loo1 <- loo(stan_model_no_group)
@@ -700,8 +723,10 @@ loo3 <- loo(stan_model)
 ```
 
 
+
+
 Approximate Leave One Out Cross Validation
-=========================================================
+===============================================================================
 title: false
 
 ```{r}
@@ -716,33 +741,135 @@ compare(loo1, loo2, loo3)
 
 
 
+Comparing the model to the priors
+===============================================================================
+type: sub-section
 
 
 
 
-`stan_lm()`
+Priors
+===============================================================================
+
+- In our models, the prior `normal(0, 5)` gets rescaled to match each predictor
+  variable.
+- This rescaling is
+  [not well documented](https://groups.google.com/forum/#!category-topic/stan-users/rstanarm/_y6aDbkdANw).
+- Some options
+  - `scale()` our measurements so that they are
+    [scale free](https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations)
+    (with mean = 0 and SD = 1).
+  - Sample from the prior to see what kinds of values are generated by our
+    priors.
+
+
+
+
+Sampling from the prior: posterior_vs_prior()
+===============================================================================
+incremental: false
+
+RStanARM will compare samples from the posterior and the prior.
+
+```{r posterior-vs-prior-1, results = 'hide', fig.cap = "default posterior_vs_prior() plot. It looks bad because one parameter ruins y-axis."}
+posterior_vs_prior(stan_model)
+```
+
+
+
+
+Sampling from the prior: posterior_vs_prior()
+===============================================================================
+title: false
+incremental: false
+
+```{r posterior-vs-prior-2, results = 'hide', fig.cap = "posterior_vs_prior() plot on just the 'height' parameters."}
+# Select just parameters with "height" in the name
+posterior_vs_prior(stan_model, regex_pars = "height")
+```
+
+
+
+
+Sampling from the prior: posterior_vs_prior()
+===============================================================================
+title: false
+incremental: false
+class: scrollable-slide
+
+```{r posterior-vs-prior-3, cache = TRUE, results = 'hide', fig.cap = "posterior_vs_prior() plot with facets for each variable. This looks best because the y-axis varies freely by facet."}
+comparison <- posterior_vs_prior(
+  stan_model,
+  group_by_parameter = TRUE,
+  facet_args = list(scales = "free_y"),
+  prob = .95)
+
+comparison + theme_grey() + guides(color = FALSE)
+```
+
+
+
+Sampling from  the prior: prior_PD = TRUE
+===============================================================================
+incremental: false
+
+We can also sample from the prior directly.
+
+```{r, cache = TRUE, results = 'hide'}
+stan_model_prior <- stan_glm(
+  weight ~ height * sex,
+  data = davis,
+  family = gaussian,
+  prior = normal(0, 5),
+  prior_intercept = normal(0, 10),
+  # this line is new:
+  prior_PD = TRUE
+)
+```
+
+
+
+
+Sampling the prior: prior_PD = TRUE
+===============================================================================
+title: false
+incremental: false
+class: scrollable-slide
+
+Our initial prior says that an increase in height of 1 cm may predict a 0 +/-
+7 kg increase in weight in women. This is a very generous interval for this
+effect!
+
+```{r}
+summary(stan_model_prior, probs = c(.1, .5, .9))
+# comment
+```
+
+This is an extra slide about stan_lm().
 ===============================================================================
 class: scrollable-slide
 
-`stan_lm()` sets a prior on R^2
+We didn't use `stan_lm()` because those models have one prior for all the
+parameters: _R_^2.
 
 ```{r, cache = TRUE, results = 'hide'}
 lm_model <- stan_lm(
   weight ~ height * sex,
   data = davis,
+  # Prior: I asked Wolfram Alpha for height and weight
+  # correlation in adults and squared it
   prior = R2(0.63))
 ```
+
+
+
+
+This is an extra slide about stan_lm().
+===============================================================================
+class: scrollable-slide
+title: false
 
 ```{r}
 summary(lm_model)
 ```
-
-
-
-
-
-
-
-
-
 
