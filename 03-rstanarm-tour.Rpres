@@ -50,7 +50,8 @@ type: sub-section
 What is Stan?
 ===============================================================================
 
-- A programming language for probablistic stats.
+A programming language for probablistic stats.
+
 - Write out a description of the data and model using a mathy syntax.
 - The model is _compiled_ into an executable that does the sampling.
 - Pystan and RStan are interfaces that help you send/receive data to/from Stan
@@ -191,7 +192,7 @@ Load the package
 ===============================================================================
 
 ```{r}
-library("rstanarm")
+library(rstanarm)
 #> Loading required package: Rcpp
 #> rstanarm (Version 2.12.1, packaged: 2016-09-12 13:08:24 UTC)
 #> - Do not expect the default priors to remain the same in future rstanarm versions.
@@ -201,8 +202,8 @@ library("rstanarm")
 ```
 
 * So... hard-code the priors.
-* I only set the `mc.cores` option when I have big model that going to take more
-  than a minute to fit.
+* I only set the `mc.cores` option when I have a big model that going to take
+  more than a minute to fit.
 
 
 
@@ -212,11 +213,11 @@ Fit the model
 class: scrollable-slide
 incremental: false
 
-* Fit this model with `stan_glm()`.
+* We have to use `stan_glm()`.
   * `stan_lm()` uses a different specification of the prior.
 * By default, it does sampling with 4 MCMC chains.
   * Each chain is 2000 samples, but the first half are warm-up samples.
-  * The warm-up samples are ignored.
+  * Warm-up samples are ignored.
 
 ```{r stan-davis, cache = FALSE}
 stan_model <- stan_glm(
@@ -256,7 +257,7 @@ summary(stan_model)
 
 
 
-More on summary()
+Notes on summary()
 ===============================================================================
 
 * Split into estimation and diagnostic information
@@ -265,7 +266,7 @@ More on summary()
 
 
 
-Inspecting the posterior samples
+Inspecting posterior samples
 ===============================================================================
 type: sub-section
 
@@ -275,7 +276,7 @@ type: sub-section
 Looking at the posterior parameter samples
 ===============================================================================
 
-Coerce to a data-frame. One row per posterior sample.
+Coerce to a data-frame. Columns are parameters. One row per posterior sample.
 
 ```{r}
 samples <- stan_model %>% as.data.frame %>% tbl_df
@@ -301,7 +302,7 @@ Quantiles are post-data probabilities
 class: scrollable-slide
 incremental: false
 
-- If we believe there is a "true" value for each parameter, there is 90%
+- If we believe there is a "true" value for a parameter, there is 90%
   probability that this "true" value is in the 90% interval, given our model,
   prior information, and the data.
 - The 90% interval contains the middle 90% of the parameter values.
@@ -444,9 +445,8 @@ p2
 
 
 
-The "Pile of Lines" Plot
+"Pile of Lines"
 ===============================================================================
-title: false
 
 - Depicts uncertainty by drawing line of best fit plus many other plausible
   regression lines.
@@ -495,10 +495,10 @@ new_data
 Get the predicted mean for each point
 ===============================================================================
 
-With the normal `predict()` function on a classical regression model, we get the
-expected mean ($\mu_i$) for each row in `newdata`.
+With the normal `predict()` function on a classical regression model, we use the
+model parameters to get the expected mean ($\mu_i$) for each row in `newdata`.
 
-With `posterior_linpred()`, we get the same thing, but for each of the 4000
+With `posterior_linpred()`, we do the same thing, but for each of the 4000
 posterior samples.
 
 ```{r}
@@ -514,6 +514,7 @@ incremental: false
 title: false
 
 ```{r}
+# In long format... 4000 samples x 160 data points
 tidy_linpreds <- linpreds %>%
   as_data_frame %>%
   tibble::rownames_to_column("Draw") %>%
@@ -569,7 +570,7 @@ p3
 Limitations of this approach
 ===============================================================================
 
-RStanARM does not like `posterior_linpred()`.
+RStanARM does not like `posterior_linpred()`. Documentation says:
 
 > **See also**: `posterior_predict` to draw from the posterior predictive
 > distribution of the outcome, which is almost always preferable.
@@ -651,7 +652,7 @@ title: false
 incremental: false
 
 
-```{r, echo = FALSE}
+```{r posterior-predict-plot, echo = FALSE, fig.cap = "Scatterplot of data with medians of simulated data and 95% posterior predictive intervals for each sex."}
 p4
 ```
 
@@ -733,7 +734,7 @@ title: false
 compare(loo1, loo2, loo3)
 ```
 
-- Importantly, the LOOIC comes with a standard error. Like other IC, lower is better.
+- Like other IC, lower is better. Importantly, the LOOIC comes with a standard error.
 - By point-value (`looic`), the model with the interaction is expected to perform the best on out-of-sample data.
 - But the `se_looic` indicates considerable overlap with the model with no interaction term.
 - Like so much of Bayesian modeling, uncertainty is everything.
@@ -755,12 +756,12 @@ Priors
   variable.
 - This rescaling is
   [not well documented](https://groups.google.com/forum/#!category-topic/stan-users/rstanarm/_y6aDbkdANw).
-- Some options
+- Some options:
   - `scale()` our measurements so that they are
     [scale free](https://github.com/stan-dev/stan/wiki/Prior-Choice-Recommendations)
     (with mean = 0 and SD = 1).
   - Sample from the prior to see what kinds of values are generated by our
-    priors.
+    prior and confirm that our prior information yields sensible model behavior.
 
 
 
@@ -798,6 +799,7 @@ incremental: false
 class: scrollable-slide
 
 ```{r posterior-vs-prior-3, cache = TRUE, results = 'hide', fig.cap = "posterior_vs_prior() plot with facets for each variable. This looks best because the y-axis varies freely by facet."}
+# use the faceting options
 comparison <- posterior_vs_prior(
   stan_model,
   group_by_parameter = TRUE,
