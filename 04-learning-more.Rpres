@@ -3,11 +3,36 @@ Bayesian Regression Models with RStanARM
 author: Tristan Mahr
 date: Sept. 21, 2016
 autosize: true
-incremental: true
+incremental: false
 
 
-Learning More
+
+
+Overview
 ===============================================================================
+
+- [How I got into Bayesian statistics](http://rpubs.com/tjmahr/rep-crisis)
+- [Some intuition-building about Bayes theorem](http://rpubs.com/tjmahr/bayes-theorem)
+- [Tour of RStanARM](http://rpubs.com/tjmahr/rstanarm-tour)
+- **[Where to learn more about Bayesian statistics](http://rpubs.com/tjmahr/bayes-learn-more)**
+
+
+
+
+Learning more
+===============================================================================
+type: section
+
+
+
+
+You want to learn RStanARM
+===============================================================================
+
+See the [vignettes](https://cran.rstudio.com/web/packages/rstanarm/). There is one for each kind of model.
+
+![RStanARM vignettes](./assets/rstanarm-vigs.PNG)
+
 
 
 
@@ -18,6 +43,8 @@ You want to learn Stan
 - Look at the [example models](https://github.com/stan-dev/example-models/wiki) and read the manual.
 
 
+
+
 The Stan Manual
 ==============================================================================
 
@@ -26,6 +53,7 @@ The Stan Manual
 ***
 
 ![](./assets/stan-man2.PNG)
+
 
 
 
@@ -43,6 +71,7 @@ Read [_Statistical Rethinking_](http://xcelab.net/rm/statistical-rethinking/) an
 
 
 
+
 'Rethinking'
 ===============================================================================
 
@@ -52,11 +81,15 @@ Read [_Statistical Rethinking_](http://xcelab.net/rm/statistical-rethinking/) an
 * My sole criticism is that its companion R `rethinking` package is not on CRAN.
 
 
+
+
 Rethinking 1
 ===============================================================================
 title:false
 
 ![](./assets/vampire.PNG)
+
+
 
 Rethinking 2
 ===============================================================================
@@ -67,6 +100,8 @@ title:false
 ***
 
 ![](./assets/conditioning.PNG)
+
+
 
 
 You need puppies on the cover
@@ -81,6 +116,8 @@ I just got this book, but so far it's approachable and comprehensive, like a sta
 ![](./assets/puppies.png)
 
 
+
+
 Puppies
 ===============================================================================
 title:false
@@ -92,7 +129,9 @@ title:false
 ![](./assets/tails.png)
 
 
-You are a psycholinguist
+
+
+You study psycholinguistics
 ===============================================================================
 left: 60%
 
@@ -105,11 +144,13 @@ left: 60%
 
 
 
+
 You need a reading list and fast
 ===============================================================================
 
 * Etz, et al. (2016). [How to become a Bayesian in eight easy steps: An annotated reading list](https://www.researchgate.net/publication/301981861_How_to_become_a_Bayesian_in_eight_easy_steps_An_annotated_reading_list).
 * Etz has also [great tutorials](https://alexanderetz.com/understanding-bayes/). They focus mostly on Bayes factors, a way to compare models using the denominators from Bayes theorem. _Statistical Rethinking_ mentions these in passing in a single paragraph.
+
 
 
 
