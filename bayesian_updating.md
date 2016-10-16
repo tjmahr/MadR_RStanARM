@@ -155,7 +155,7 @@ p <- ggplot(df_fit) +
 animation::ani.options(interval = 1/10)
 g <- gg_animate(p,  ani.height = 400, ani.width = 640)
 # g
-gg_animate_save(g, filename = "./updating.gif", saver = "gif",
+gg_animate_save(g, filename = "./assets/updating.gif", saver = "gif",
                 ani.height = 400, ani.width = 640)
 #> Executing: 
 #> ""convert" -loop 0 -delay 10 Rplot1.png Rplot2.png Rplot3.png
@@ -180,7 +180,7 @@ p <- ggplot(df_fit) +
 
 g2 <- gg_animate(p,  ani.height = 400, ani.width = 640)
 
-gg_animate_save(g2, filename = "./updating_sds.gif", saver = "gif",
+gg_animate_save(g2, filename = "./assets/updating_sds.gif", saver = "gif",
                 ani.height = 400, ani.width = 640)
 #> Executing: 
 #> ""convert" -loop 0 -delay 10 Rplot1.png Rplot2.png Rplot3.png
@@ -205,7 +205,7 @@ g3 <- gg_animate(p, ani.height = 400, ani.width = 640)
 #> sort(unique(data$y)), : all z values are equal
 #> Warning: Not possible to generate contour data
 
-gg_animate_save(g3, filename = "./updating_contour.gif", saver = "gif",
+gg_animate_save(g3, filename = "./assets/updating_contour.gif", saver = "gif",
                 ani.height = 400, ani.width = 640)
 #> Executing: 
 #> ""convert" -loop 0 -delay 10 Rplot1.png Rplot2.png Rplot3.png
@@ -218,4 +218,4 @@ gg_animate_save(g3, filename = "./updating_contour.gif", saver = "gif",
 #> Output at: updating_contour.gif
 ```
 
-![](./updating.gif) ![](./updating_sds.gif) ![](./updating_contour.gif)
+![](./assets/updating.gif) ![](./assets/updating_sds.gif) ![](./assets/updating_contour.gif)
